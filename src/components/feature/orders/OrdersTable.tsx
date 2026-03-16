@@ -6,12 +6,13 @@ import {
 	useReactTable,
 } from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { memo, useMemo, useRef } from "react";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { Card } from "@/components/ui/Card";
 import { Pagination } from "@/components/ui/Pagination";
+import { useDebounce } from "@/hooks/useDebounce";
 import type { Order, OrderStatus } from "@/types/order";
 import { formatDateTime } from "@/utils/formatDate";
-import { formatCount } from "@/utils/formatNumber";
+import { formatCount, formatCurrency } from "@/utils/formatNumber";
 import { OrderStatusBadge } from "./OrderStatusBadge";
 
 interface OrdersTableProps {
@@ -61,6 +62,18 @@ export const OrdersTable = memo(function OrdersTable({
 }: OrdersTableProps) {
 	const parentRef = useRef<HTMLDivElement>(null);
 
+	// 검색 디바운스: 로컬 상태로 즉시 UI 반영, 300ms 후 외부 콜백 호출
+	const [localSearch, setLocalSearch] = useState(searchQuery);
+	const debouncedSearch = useDebounce(localSearch, 300);
+	const isFirstSearchRender = useRef(true);
+	useEffect(() => {
+		if (isFirstSearchRender.current) {
+			isFirstSearchRender.current = false;
+			return;
+		}
+		onSearchChange(debouncedSearch);
+	}, [debouncedSearch]); // eslint-disable-line react-hooks/exhaustive-deps
+
 	// TanStack Table 정렬 상태를 외부 props에서 파생
 	const sorting: SortingState = sortBy ? [{ id: sortBy, desc: sortOrder === "desc" }] : [];
 
@@ -108,12 +121,7 @@ export const OrdersTable = memo(function OrdersTable({
 				header: "금액",
 				size: 120,
 				enableSorting: true,
-				cell: ({ getValue }) =>
-					new Intl.NumberFormat("ko-KR", {
-						style: "currency",
-						currency: "KRW",
-						maximumFractionDigits: 0,
-					}).format(getValue<number>()),
+				cell: ({ getValue }) => formatCurrency(getValue<number>()),
 			},
 			{
 				accessorKey: "status",
@@ -169,8 +177,8 @@ export const OrdersTable = memo(function OrdersTable({
 				<input
 					type="search"
 					placeholder="주문번호, 구매자명, 상품명 검색"
-					value={searchQuery}
-					onChange={(e) => onSearchChange(e.target.value)}
+					value={localSearch}
+					onChange={(e) => setLocalSearch(e.target.value)}
 					className="w-64 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
 				/>
 			</div>

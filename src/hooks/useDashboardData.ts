@@ -1,15 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import {
-	computeCategoryData,
-	computeKpiMetrics,
-	computeSalesData,
-	generateOrders,
-} from "@/constants/dummyData";
+import { computeCategoryData, computeKpiMetrics, computeSalesData } from "@/constants/dummyData";
+import { FALLBACK_ORDERS } from "@/constants/fallbackData";
 import { fetchCategoryData, fetchKpiMetrics, fetchSalesData } from "@/services/orderService";
 import type { ChartPeriod } from "@/types/chart";
 
-// DB 미연결 / 빈 테이블일 때 폴백용 더미 데이터
-const FALLBACK_ORDERS = generateOrders(5_000);
 const FALLBACK_KPI = computeKpiMetrics(FALLBACK_ORDERS);
 const FALLBACK_CATEGORY = computeCategoryData(FALLBACK_ORDERS);
 

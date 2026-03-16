@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { OrdersTable } from "@/components/feature/orders/OrdersTable";
 import { generateOrders } from "@/constants/dummyData";
@@ -33,11 +33,16 @@ describe("OrdersTable", () => {
 	});
 
 	it("검색어 입력 시 onSearchChange가 호출된다", () => {
+		vi.useFakeTimers();
 		const handleChange = vi.fn();
 		render(<OrdersTable {...defaultProps} onSearchChange={handleChange} />);
 		const input = screen.getByPlaceholderText(/검색/);
 		fireEvent.change(input, { target: { value: "김민준" } });
+		act(() => {
+			vi.advanceTimersByTime(300);
+		});
 		expect(handleChange).toHaveBeenCalledWith("김민준");
+		vi.useRealTimers();
 	});
 
 	it("주문 건수 정보를 표시한다", () => {

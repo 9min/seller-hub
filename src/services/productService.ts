@@ -1,5 +1,8 @@
 import { supabase } from "@/lib/supabase";
+import type { Database } from "@/types/database";
 import type { Product, ProductStatus } from "@/types/product";
+
+type ProductRow = Database["public"]["Tables"]["products"]["Row"];
 
 export type ProductSortableColumn = "name" | "unitPrice" | "stock" | "salesCount";
 
@@ -25,18 +28,18 @@ export interface FetchProductsResult {
 	total: number;
 }
 
-function rowToProduct(row: Record<string, unknown>): Product {
+function rowToProduct(row: ProductRow): Product {
 	return {
-		id: row.id as string,
-		sku: row.sku as string,
-		name: row.name as string,
-		category: row.category as string,
-		unitPrice: row.unit_price as number,
-		stock: row.stock as number,
-		salesCount: row.sales_count as number,
+		id: row.id,
+		sku: row.sku,
+		name: row.name,
+		category: row.category,
+		unitPrice: row.unit_price,
+		stock: row.stock,
+		salesCount: row.sales_count,
 		status: row.status as ProductStatus,
-		createdAt: row.created_at as string,
-		updatedAt: row.updated_at as string,
+		createdAt: row.created_at,
+		updatedAt: row.updated_at,
 	};
 }
 
@@ -76,7 +79,7 @@ export async function fetchProducts(params: FetchProductsParams): Promise<FetchP
 	}
 
 	return {
-		products: ((data ?? []) as Record<string, unknown>[]).map(rowToProduct),
+		products: (data ?? []).map(rowToProduct),
 		total: count ?? 0,
 	};
 }

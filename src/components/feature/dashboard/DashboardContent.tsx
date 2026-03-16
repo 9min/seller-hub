@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { memo, useState } from "react";
 import { RecentOrdersTable } from "@/components/feature/orders/RecentOrdersTable";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { useOrdersData } from "@/hooks/useOrdersData";
@@ -7,7 +7,7 @@ import { CategoryChart } from "./CategoryChart";
 import { KpiSection } from "./KpiSection";
 import { SalesChart } from "./SalesChart";
 
-export function DashboardContent() {
+export const DashboardContent = memo(function DashboardContent() {
 	const [period, setPeriod] = useState<ChartPeriod>("daily");
 	const { kpi, sales, category } = useDashboardData(period);
 	const { orders, total, isLoading } = useOrdersData({ page: 0, pageSize: 5 });
@@ -29,4 +29,4 @@ export function DashboardContent() {
 			<RecentOrdersTable orders={orders} total={total} isLoading={isLoading} />
 		</div>
 	);
-}
+});

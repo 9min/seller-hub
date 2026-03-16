@@ -5,6 +5,34 @@
 export type Database = {
 	public: {
 		Tables: {
+			products: {
+				Row: {
+					id: string;
+					sku: string;
+					name: string;
+					category: string;
+					unit_price: number;
+					stock: number;
+					sales_count: number;
+					status: string;
+					created_at: string;
+					updated_at: string;
+				};
+				Insert: {
+					id?: string;
+					sku: string;
+					name: string;
+					category: string;
+					unit_price: number;
+					stock?: number;
+					sales_count?: number;
+					status?: string;
+					created_at?: string;
+					updated_at?: string;
+				};
+				Update: Partial<Database["public"]["Tables"]["products"]["Insert"]>;
+				Relationships: [];
+			};
 			orders: {
 				Row: {
 					id: string;
@@ -45,6 +73,39 @@ export type Database = {
 			};
 		};
 		Functions: {
+			get_analytics_summary: {
+				Args: { p_period: number };
+				Returns: Array<{
+					total_revenue: number;
+					total_orders: number;
+					avg_order_value: number;
+					return_rate: number;
+				}>;
+			};
+			get_analytics_trend: {
+				Args: { p_period: number };
+				Returns: Array<{
+					date: string;
+					revenue: number;
+					orders: number;
+				}>;
+			};
+			get_analytics_category: {
+				Args: { p_period: number };
+				Returns: Array<{
+					category: string;
+					revenue: number;
+					orders: number;
+				}>;
+			};
+			get_analytics_top_products: {
+				Args: { p_period: number };
+				Returns: Array<{
+					product_name: string;
+					revenue: number;
+					orders: number;
+				}>;
+			};
 			get_kpi_metrics: {
 				Args: Record<string, never>;
 				Returns: Array<{
