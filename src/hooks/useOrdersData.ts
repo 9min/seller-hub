@@ -1,10 +1,9 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { generateOrders } from "@/constants/dummyData";
+import { FALLBACK_ORDERS } from "@/constants/fallbackData";
 import type { FetchOrdersParams } from "@/services/orderService";
 import { fetchOrders } from "@/services/orderService";
 
 const PAGE_SIZE = 100;
-const FALLBACK_ORDERS = generateOrders(5_000);
 
 // 모듈 레벨 — StrictMode 리마운트에도 유지됨
 let dbEmpty = false;

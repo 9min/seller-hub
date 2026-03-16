@@ -6,9 +6,10 @@ import {
 	useReactTable,
 } from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { memo, useMemo, useRef } from "react";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { Card } from "@/components/ui/Card";
 import { Pagination } from "@/components/ui/Pagination";
+import { useDebounce } from "@/hooks/useDebounce";
 import type { Product, ProductStatus } from "@/types/product";
 import { formatCount, formatCurrency } from "@/utils/formatNumber";
 import { ProductStatusBadge } from "./ProductStatusBadge";
@@ -59,6 +60,18 @@ export const ProductsTable = memo(function ProductsTable({
 	isFetching,
 }: ProductsTableProps) {
 	const parentRef = useRef<HTMLDivElement>(null);
+
+	// 검색 디바운스: 로컬 상태로 즉시 UI 반영, 300ms 후 외부 콜백 호출
+	const [localSearch, setLocalSearch] = useState(searchQuery);
+	const debouncedSearch = useDebounce(localSearch, 300);
+	const isFirstSearchRender = useRef(true);
+	useEffect(() => {
+		if (isFirstSearchRender.current) {
+			isFirstSearchRender.current = false;
+			return;
+		}
+		onSearchChange(debouncedSearch);
+	}, [debouncedSearch, onSearchChange]);
 
 	const sorting: SortingState = sortBy ? [{ id: sortBy, desc: sortOrder === "desc" }] : [];
 
@@ -154,8 +167,8 @@ export const ProductsTable = memo(function ProductsTable({
 				<input
 					type="search"
 					placeholder="상품명, SKU 검색"
-					value={searchQuery}
-					onChange={(e) => onSearchChange(e.target.value)}
+					value={localSearch}
+					onChange={(e) => setLocalSearch(e.target.value)}
 					className="w-56 rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-violet-500"
 				/>
 			</div>

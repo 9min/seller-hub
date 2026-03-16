@@ -1,9 +1,12 @@
 import { CATEGORY_COLORS, DEFAULT_CATEGORY_COLOR } from "@/constants/orderStatus";
 import { supabase } from "@/lib/supabase";
 import type { CategoryDataPoint, ChartPeriod, SalesDataPoint } from "@/types/chart";
+import type { Database } from "@/types/database";
 import type { KpiMetric, KpiTrend } from "@/types/kpi";
-import type { Order, OrderStatus } from "@/types/order";
+import type { Order } from "@/types/order";
 import { formatCount, formatCurrency, formatPercent } from "@/utils/formatNumber";
+
+type OrderRow = Database["public"]["Tables"]["orders"]["Row"];
 
 export type SortableColumn = "orderedAt" | "totalPrice" | "quantity";
 
@@ -30,21 +33,21 @@ export interface FetchOrdersResult {
 }
 
 // DB 행(snake_case) → Order 도메인 타입(camelCase) 변환
-function rowToOrder(row: Record<string, unknown>): Order {
+function rowToOrder(row: OrderRow): Order {
 	return {
-		id: row.id as string,
-		orderNumber: row.order_number as string,
-		buyerName: row.buyer_name as string,
-		productName: row.product_name as string,
-		category: row.category as string,
-		quantity: row.quantity as number,
-		unitPrice: row.unit_price as number,
-		totalPrice: row.total_price as number,
+		id: row.id,
+		orderNumber: row.order_number,
+		buyerName: row.buyer_name,
+		productName: row.product_name,
+		category: row.category,
+		quantity: row.quantity,
+		unitPrice: row.unit_price,
+		totalPrice: row.total_price,
 		status: row.status as Order["status"],
-		orderedAt: row.ordered_at as string,
-		shippedAt: row.shipped_at as string | null,
-		deliveredAt: row.delivered_at as string | null,
-		isDelayed: row.is_delayed as boolean,
+		orderedAt: row.ordered_at,
+		shippedAt: row.shipped_at,
+		deliveredAt: row.delivered_at,
+		isDelayed: row.is_delayed,
 	};
 }
 
@@ -61,8 +64,13 @@ export async function fetchOrders(params: FetchOrdersParams): Promise<FetchOrder
 		.range(page * pageSize, (page + 1) * pageSize - 1);
 
 	if (searchQuery?.trim()) {
-		const q = searchQuery.trim();
-		query = query.or(`order_number.ilike.%${q}%,buyer_name.ilike.%${q}%,product_name.ilike.%${q}%`);
+		// PostgREST 메타문자 이스케이프 (쉼표, 마침표, 괄호 등)
+		const q = searchQuery.trim().replace(/[,%.()"\\]/g, "");
+		if (q) {
+			query = query.or(
+				`order_number.ilike.%${q}%,buyer_name.ilike.%${q}%,product_name.ilike.%${q}%`,
+			);
+		}
 	}
 
 	if (statuses && statuses.length > 0) {
@@ -87,7 +95,7 @@ export async function fetchOrders(params: FetchOrdersParams): Promise<FetchOrder
 	}
 
 	return {
-		orders: ((data ?? []) as Record<string, unknown>[]).map(rowToOrder),
+		orders: (data ?? []).map(rowToOrder),
 		total: count ?? 0,
 	};
 }

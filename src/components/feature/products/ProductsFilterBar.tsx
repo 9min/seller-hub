@@ -1,8 +1,7 @@
+import { PRODUCT_CATEGORIES } from "@/constants/productCategories";
 import { PRODUCT_STATUS_LABEL } from "@/constants/productStatus";
 import type { ProductStatus } from "@/types/product";
 import { cn } from "@/utils/cn";
-
-const CATEGORIES = ["패션의류", "전자기기", "뷰티", "스포츠", "홈리빙", "식품"];
 
 interface ProductsFilterBarProps {
 	categories: string[];
@@ -42,7 +41,7 @@ export function ProductsFilterBar({
 			{/* 카테고리 필터 */}
 			<div className="flex flex-wrap items-center gap-2">
 				<span className="whitespace-nowrap text-xs font-medium text-gray-500">카테고리</span>
-				{CATEGORIES.map((cat) => (
+				{PRODUCT_CATEGORIES.map((cat) => (
 					<label key={cat} className="flex cursor-pointer items-center gap-1">
 						<input
 							type="checkbox"

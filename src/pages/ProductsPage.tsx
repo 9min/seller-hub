@@ -2,6 +2,7 @@ import { useSearchParams } from "react-router-dom";
 import { ProductsFilterBar } from "@/components/feature/products/ProductsFilterBar";
 import { ProductsTable } from "@/components/feature/products/ProductsTable";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { PRODUCT_CATEGORIES } from "@/constants/productCategories";
 import { PRODUCT_STATUS_LABEL } from "@/constants/productStatus";
 import { useProductsData } from "@/hooks/useProductsData";
 import type { FetchProductsParams, ProductSortableColumn } from "@/services/productService";
@@ -11,7 +12,6 @@ const PAGE_SIZE = 50;
 
 const ALLOWED_SORT_BY: ProductSortableColumn[] = ["name", "unitPrice", "stock", "salesCount"];
 const ALLOWED_STATUSES = Object.keys(PRODUCT_STATUS_LABEL) as ProductStatus[];
-const ALLOWED_CATEGORIES = ["패션의류", "전자기기", "뷰티", "스포츠", "홈리빙", "식품"];
 
 function parseProductsSearchParams(searchParams: URLSearchParams): FetchProductsParams {
 	const page = Math.max(0, Number(searchParams.get("page") ?? "0") || 0);
@@ -19,7 +19,7 @@ function parseProductsSearchParams(searchParams: URLSearchParams): FetchProducts
 
 	const categoriesRaw = searchParams.get("categories") ?? "";
 	const categories = categoriesRaw
-		? categoriesRaw.split(",").filter((c) => ALLOWED_CATEGORIES.includes(c))
+		? categoriesRaw.split(",").filter((c) => (PRODUCT_CATEGORIES as readonly string[]).includes(c))
 		: [];
 
 	const statusesRaw = searchParams.get("statuses") ?? "";

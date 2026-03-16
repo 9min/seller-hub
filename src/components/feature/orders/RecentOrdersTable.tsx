@@ -1,9 +1,9 @@
 import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
-import type { Order, OrderStatus } from "@/types/order";
+import type { Order } from "@/types/order";
 import { formatDateTime } from "@/utils/formatDate";
-import { formatCount } from "@/utils/formatNumber";
+import { formatCount, formatCurrency } from "@/utils/formatNumber";
 import { OrderStatusBadge } from "./OrderStatusBadge";
 
 interface RecentOrdersTableProps {
@@ -82,14 +82,10 @@ export function RecentOrdersTable({ orders, total, isLoading }: RecentOrdersTabl
 								<td className="px-4 py-3 text-gray-700">{order.buyerName}</td>
 								<td className="px-4 py-3 text-gray-700 truncate max-w-0">{order.productName}</td>
 								<td className="px-4 py-3 text-gray-700 tabular-nums whitespace-nowrap">
-									{new Intl.NumberFormat("ko-KR", {
-										style: "currency",
-										currency: "KRW",
-										maximumFractionDigits: 0,
-									}).format(order.totalPrice)}
+									{formatCurrency(order.totalPrice)}
 								</td>
 								<td className="px-4 py-3">
-									<OrderStatusBadge status={order.status as OrderStatus} />
+									<OrderStatusBadge status={order.status} />
 								</td>
 							</tr>
 						))}
