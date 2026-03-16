@@ -17,6 +17,7 @@ interface OrdersTableProps {
 	onSearchChange: (value: string) => void;
 	onPageChange: (page: number) => void;
 	isLoading?: boolean;
+	isFetching?: boolean;
 }
 
 const ROW_HEIGHT = 48;
@@ -31,6 +32,7 @@ export const OrdersTable = memo(function OrdersTable({
 	onSearchChange,
 	onPageChange,
 	isLoading,
+	isFetching,
 }: OrdersTableProps) {
 	const parentRef = useRef<HTMLDivElement>(null);
 
@@ -187,7 +189,13 @@ export const OrdersTable = memo(function OrdersTable({
 			</div>
 
 			{/* 페이지네이션 */}
-			<Pagination page={page} pageSize={pageSize} total={total} onPageChange={onPageChange} />
+			<Pagination
+				page={page}
+				pageSize={pageSize}
+				total={total}
+				onPageChange={onPageChange}
+				isFetching={isFetching}
+			/>
 		</Card>
 	);
 });

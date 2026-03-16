@@ -48,4 +48,16 @@ describe("OrdersTable", () => {
 		expect(screen.getByText("이전")).toBeInTheDocument();
 		expect(screen.getByText("다음")).toBeInTheDocument();
 	});
+
+	it("isFetching이 true이면 '다음' 버튼이 비활성화된다", () => {
+		// total=200으로 마지막 페이지가 아닌 상태 (isLast=false)지만 isFetching으로 비활성화
+		render(<OrdersTable {...defaultProps} total={200} isFetching={true} />);
+		expect(screen.getByText("다음")).toBeDisabled();
+	});
+
+	it("isFetching이 false이면 '다음' 버튼이 페이지 상태에 따라 활성화된다", () => {
+		// total=200, page=0, pageSize=100 → lastPage=1, isLast=false → 활성화
+		render(<OrdersTable {...defaultProps} total={200} isFetching={false} />);
+		expect(screen.getByText("다음")).not.toBeDisabled();
+	});
 });

@@ -5,7 +5,8 @@ import { useOrdersData } from "@/hooks/useOrdersData";
 const PAGE_SIZE = 100;
 
 export function OrdersPage() {
-	const { orders, total, page, setPage, searchQuery, setSearchQuery, isLoading } = useOrdersData();
+	const { orders, total, page, setPage, searchQuery, setSearchQuery, isLoading, isFetching } =
+		useOrdersData();
 
 	return (
 		<AppLayout title="주문 관리">
@@ -21,6 +22,7 @@ export function OrdersPage() {
 				}}
 				onPageChange={setPage}
 				isLoading={isLoading}
+				isFetching={isFetching}
 			/>
 		</AppLayout>
 	);
