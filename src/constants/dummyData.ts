@@ -1,6 +1,14 @@
+import type {
+	AnalyticsCategoryPoint,
+	AnalyticsPeriod,
+	AnalyticsSummary,
+	AnalyticsTopProduct,
+	AnalyticsTrendPoint,
+} from "@/types/analytics";
 import type { CategoryDataPoint, ChartPeriod, SalesDataPoint } from "@/types/chart";
 import type { KpiMetric } from "@/types/kpi";
 import type { Order, OrderStatus } from "@/types/order";
+import type { Product, ProductStatus } from "@/types/product";
 import { formatCount, formatCurrency, formatPercent } from "@/utils/formatNumber";
 
 const CATEGORIES = ["패션의류", "전자기기", "뷰티", "스포츠", "홈리빙", "식품"];
@@ -214,4 +222,173 @@ export function computeCategoryData(orders: Order[]): CategoryDataPoint[] {
 		value,
 		color: CATEGORY_COLORS[idx % CATEGORY_COLORS.length] ?? "#2563eb",
 	}));
+}
+
+// ─── 상품 더미 데이터 ────────────────────────────────────────────────────────
+
+const PRODUCT_STATUSES: ProductStatus[] = ["ACTIVE", "ACTIVE", "ACTIVE", "SOLD_OUT", "HIDDEN"];
+
+export function generateProducts(count: number): Product[] {
+	const rand = seededRandom(99);
+	const products: Product[] = [];
+
+	for (let i = 0; i < count; i++) {
+		const category = CATEGORIES[Math.floor(rand() * CATEGORIES.length)] ?? "패션의류";
+		const names = PRODUCT_NAMES[category] ?? ["상품"];
+		const name = names[Math.floor(rand() * names.length)] ?? "상품";
+		const status = PRODUCT_STATUSES[Math.floor(rand() * PRODUCT_STATUSES.length)] ?? "ACTIVE";
+		const unitPrice = (Math.floor(rand() * 100) + 1) * 1000;
+		const stock = Math.floor(rand() * 500);
+		const salesCount = Math.floor(rand() * 1000);
+		const sku = `SKU-${String(i + 1).padStart(5, "0")}`;
+
+		products.push({
+			id: `product-${i + 1}`,
+			sku,
+			name,
+			category,
+			unitPrice,
+			stock,
+			salesCount,
+			status,
+			createdAt: "2026-01-01T00:00:00.000Z",
+			updatedAt: "2026-03-01T00:00:00.000Z",
+		});
+	}
+
+	return products;
+}
+
+// ─── 매출 분석 더미 데이터 ────────────────────────────────────────────────────
+
+export function computeAnalyticsSummary(
+	orders: Order[],
+	period: AnalyticsPeriod,
+): AnalyticsSummary {
+	const now = Date.now();
+	const cutoff = now - period * 86400000;
+	const prevCutoff = cutoff - period * 86400000;
+
+	const current = orders.filter(
+		(o) =>
+			new Date(o.orderedAt).getTime() >= cutoff &&
+			!["CANCELLED", "RETURN_REQUESTED"].includes(o.status),
+	);
+	const prev = orders.filter(
+		(o) =>
+			new Date(o.orderedAt).getTime() >= prevCutoff &&
+			new Date(o.orderedAt).getTime() < cutoff &&
+			!["CANCELLED", "RETURN_REQUESTED"].includes(o.status),
+	);
+
+	const totalRevenue = current.reduce((s, o) => s + o.totalPrice, 0);
+	const prevRevenue = prev.reduce((s, o) => s + o.totalPrice, 0);
+	const totalOrders = current.length;
+	const avgUnitPrice = totalOrders > 0 ? Math.round(totalRevenue / totalOrders) : 0;
+	const revenueGrowthRate =
+		prevRevenue > 0 ? Math.round(((totalRevenue - prevRevenue) / prevRevenue) * 1000) / 10 : 0;
+
+	return {
+		totalRevenue,
+		formattedTotalRevenue: formatCurrency(totalRevenue),
+		totalOrders,
+		avgUnitPrice,
+		formattedAvgUnitPrice: formatCurrency(avgUnitPrice),
+		revenueGrowthRate,
+		trend: revenueGrowthRate > 0 ? "up" : revenueGrowthRate < 0 ? "down" : "neutral",
+	};
+}
+
+export function computeAnalyticsTrend(
+	orders: Order[],
+	period: AnalyticsPeriod,
+): AnalyticsTrendPoint[] {
+	const now = Date.now();
+	const cutoff = now - period * 86400000;
+
+	const currentMap = new Map<string, number>();
+	const prevMap = new Map<string, number>();
+
+	for (let i = 0; i < period; i++) {
+		const date = new Date(now - (period - 1 - i) * 86400000);
+		const label = `${date.getMonth() + 1}/${date.getDate()}`;
+		currentMap.set(label, 0);
+		const prevDate = new Date(cutoff - (period - 1 - i) * 86400000);
+		const prevLabel = `${prevDate.getMonth() + 1}/${prevDate.getDate()}`;
+		prevMap.set(prevLabel, 0);
+	}
+
+	for (const order of orders) {
+		if (["CANCELLED", "RETURN_REQUESTED"].includes(order.status)) continue;
+		const t = new Date(order.orderedAt).getTime();
+		const date = new Date(order.orderedAt);
+		const label = `${date.getMonth() + 1}/${date.getDate()}`;
+		if (t >= cutoff) {
+			currentMap.set(label, (currentMap.get(label) ?? 0) + order.totalPrice);
+		} else if (t >= cutoff - period * 86400000) {
+			prevMap.set(label, (prevMap.get(label) ?? 0) + order.totalPrice);
+		}
+	}
+
+	return Array.from(currentMap.entries()).map(([label, currentRevenue], i) => ({
+		label,
+		currentRevenue,
+		previousRevenue: Array.from(prevMap.values())[i] ?? 0,
+	}));
+}
+
+export function computeAnalyticsCategory(
+	orders: Order[],
+	period: AnalyticsPeriod,
+): AnalyticsCategoryPoint[] {
+	const now = Date.now();
+	const cutoff = now - period * 86400000;
+	const map = new Map<string, number>();
+
+	for (const order of orders) {
+		if (["CANCELLED", "RETURN_REQUESTED"].includes(order.status)) continue;
+		if (new Date(order.orderedAt).getTime() < cutoff) continue;
+		map.set(order.category, (map.get(order.category) ?? 0) + order.totalPrice);
+	}
+
+	return Array.from(map.entries()).map(([name, revenue], idx) => ({
+		name,
+		revenue,
+		color: CATEGORY_COLORS[idx % CATEGORY_COLORS.length] ?? "#2563eb",
+	}));
+}
+
+export function computeAnalyticsTopProducts(
+	orders: Order[],
+	period: AnalyticsPeriod,
+	limit = 10,
+): AnalyticsTopProduct[] {
+	const now = Date.now();
+	const cutoff = now - period * 86400000;
+	const map = new Map<string, { category: string; quantity: number; revenue: number }>();
+
+	for (const order of orders) {
+		if (["CANCELLED", "RETURN_REQUESTED"].includes(order.status)) continue;
+		if (new Date(order.orderedAt).getTime() < cutoff) continue;
+		const entry = map.get(order.productName) ?? {
+			category: order.category,
+			quantity: 0,
+			revenue: 0,
+		};
+		entry.quantity += order.quantity;
+		entry.revenue += order.totalPrice;
+		map.set(order.productName, entry);
+	}
+
+	return Array.from(map.entries())
+		.sort((a, b) => b[1].revenue - a[1].revenue)
+		.slice(0, limit)
+		.map(([productName, { category, quantity, revenue }], idx) => ({
+			rank: idx + 1,
+			productName,
+			category,
+			quantity,
+			revenue,
+			formattedRevenue: formatCurrency(revenue),
+		}));
 }
