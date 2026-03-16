@@ -71,7 +71,7 @@ export const ProductsTable = memo(function ProductsTable({
 			return;
 		}
 		onSearchChange(debouncedSearch);
-	}, [debouncedSearch]); // eslint-disable-line react-hooks/exhaustive-deps
+	}, [debouncedSearch, onSearchChange]);
 
 	const sorting: SortingState = sortBy ? [{ id: sortBy, desc: sortOrder === "desc" }] : [];
 

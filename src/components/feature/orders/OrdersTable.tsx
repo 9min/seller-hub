@@ -72,7 +72,7 @@ export const OrdersTable = memo(function OrdersTable({
 			return;
 		}
 		onSearchChange(debouncedSearch);
-	}, [debouncedSearch]); // eslint-disable-line react-hooks/exhaustive-deps
+	}, [debouncedSearch, onSearchChange]);
 
 	// TanStack Table 정렬 상태를 외부 props에서 파생
 	const sorting: SortingState = sortBy ? [{ id: sortBy, desc: sortOrder === "desc" }] : [];
