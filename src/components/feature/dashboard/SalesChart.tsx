@@ -1,4 +1,3 @@
-import { useMemo, useState } from "react";
 import {
 	CartesianGrid,
 	Line,
@@ -11,9 +10,7 @@ import {
 import { Card } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { TabGroup } from "@/components/ui/TabGroup";
-import { computeSalesData } from "@/constants/dummyData";
-import type { ChartPeriod } from "@/types/chart";
-import type { Order } from "@/types/order";
+import type { ChartPeriod, SalesDataPoint } from "@/types/chart";
 
 const PERIOD_TABS: { value: ChartPeriod; label: string }[] = [
 	{ value: "daily", label: "일별" },
@@ -22,15 +19,13 @@ const PERIOD_TABS: { value: ChartPeriod; label: string }[] = [
 ];
 
 interface SalesChartProps {
-	orders: Order[];
+	salesData: SalesDataPoint[] | undefined;
+	period: ChartPeriod;
+	onPeriodChange: (period: ChartPeriod) => void;
 	isLoading?: boolean;
 }
 
-export function SalesChart({ orders, isLoading }: SalesChartProps) {
-	const [period, setPeriod] = useState<ChartPeriod>("daily");
-
-	const salesData = useMemo(() => computeSalesData(orders, period), [orders, period]);
-
+export function SalesChart({ salesData, period, onPeriodChange, isLoading }: SalesChartProps) {
 	if (isLoading) {
 		return <Skeleton className="h-80" />;
 	}
@@ -39,10 +34,10 @@ export function SalesChart({ orders, isLoading }: SalesChartProps) {
 		<Card>
 			<div className="flex items-center justify-between mb-4">
 				<h2 className="text-sm font-semibold text-gray-700">매출 추이</h2>
-				<TabGroup items={PERIOD_TABS} value={period} onChange={setPeriod} />
+				<TabGroup items={PERIOD_TABS} value={period} onChange={onPeriodChange} />
 			</div>
 			<ResponsiveContainer width="100%" height={240}>
-				<LineChart data={salesData} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
+				<LineChart data={salesData ?? []} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
 					<CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
 					<XAxis
 						dataKey="label"

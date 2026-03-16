@@ -13,7 +13,9 @@
 		"db:start": "pnpm supabase start",
 		"db:stop": "pnpm supabase stop",
 		"db:reset": "pnpm supabase db reset",
-		"db:types": "pnpm supabase gen types typescript --local > src/types/database.ts"
+		"db:types": "pnpm supabase gen types typescript --local > src/types/database.ts",
+		"generate:seed": "tsx scripts/generateSeed.ts > supabase/seed.sql",
+		"seed:remote": "tsx --env-file .env.local scripts/seedRemote.ts"
 	},
 	"dependencies": {
 		"@supabase/supabase-js": "^2.99.1",
@@ -48,6 +50,7 @@
 		"lefthook": "^2.1.4",
 		"supabase": "^2.78.1",
 		"tailwindcss": "^4.2.1",
+		"tsx": "^4.21.0",
 		"typescript": "^5.9.3",
 		"vite": "^6.4.1",
 		"vitest": "^4.1.0"

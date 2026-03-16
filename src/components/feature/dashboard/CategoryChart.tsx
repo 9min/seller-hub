@@ -1,18 +1,14 @@
-import { useMemo } from "react";
 import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import { Card } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { computeCategoryData } from "@/constants/dummyData";
-import type { Order } from "@/types/order";
+import type { CategoryDataPoint } from "@/types/chart";
 
 interface CategoryChartProps {
-	orders: Order[];
+	categoryData: CategoryDataPoint[] | undefined;
 	isLoading?: boolean;
 }
 
-export function CategoryChart({ orders, isLoading }: CategoryChartProps) {
-	const categoryData = useMemo(() => computeCategoryData(orders), [orders]);
-
+export function CategoryChart({ categoryData, isLoading }: CategoryChartProps) {
 	if (isLoading) {
 		return <Skeleton className="h-80" />;
 	}
@@ -23,7 +19,7 @@ export function CategoryChart({ orders, isLoading }: CategoryChartProps) {
 			<ResponsiveContainer width="100%" height={240}>
 				<PieChart>
 					<Pie
-						data={categoryData}
+						data={categoryData ?? []}
 						cx="50%"
 						cy="45%"
 						innerRadius={55}
@@ -33,7 +29,7 @@ export function CategoryChart({ orders, isLoading }: CategoryChartProps) {
 						animationBegin={0}
 						animationDuration={600}
 					>
-						{categoryData.map((entry) => (
+						{(categoryData ?? []).map((entry) => (
 							<Cell key={entry.name} fill={entry.color} />
 						))}
 					</Pie>
