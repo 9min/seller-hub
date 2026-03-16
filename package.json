@@ -1,0 +1,48 @@
+{
+	"name": "seller-hub",
+	"private": true,
+	"version": "0.1.0",
+	"type": "module",
+	"scripts": {
+		"dev": "vite",
+		"build": "tsc -b && vite build",
+		"preview": "vite preview",
+		"lint": "biome check --write .",
+		"test": "vitest",
+		"test:coverage": "vitest run --coverage",
+		"db:start": "npx supabase start",
+		"db:stop": "npx supabase stop",
+		"db:reset": "npx supabase db reset",
+		"db:types": "npx supabase gen types typescript --local > src/types/database.ts"
+	},
+	"dependencies": {
+		"@supabase/supabase-js": "^2.99.1",
+		"@tanstack/react-query": "^5.90.21",
+		"@tanstack/react-table": "^8.21.3",
+		"@tanstack/react-virtual": "^3.13.22",
+		"clsx": "^2.1.1",
+		"react": "^19.2.4",
+		"react-dom": "^19.2.4",
+		"react-router-dom": "^7.13.1",
+		"recharts": "^3.8.0",
+		"tailwind-merge": "^3.5.0",
+		"zustand": "^5.0.12"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.4.7",
+		"@tailwindcss/vite": "^4.2.1",
+		"@testing-library/jest-dom": "^6.9.1",
+		"@testing-library/react": "^16.3.2",
+		"@testing-library/user-event": "^14.6.1",
+		"@types/react": "^19.2.14",
+		"@types/react-dom": "^19.2.3",
+		"@vitejs/plugin-react": "^4.7.0",
+		"jsdom": "^29.0.0",
+		"lefthook": "^2.1.4",
+		"supabase": "^2.78.1",
+		"tailwindcss": "^4.2.1",
+		"typescript": "^5.9.3",
+		"vite": "^6.4.1",
+		"vitest": "^4.1.0"
+	}
+}
