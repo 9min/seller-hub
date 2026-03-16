@@ -10,10 +10,10 @@
 		"lint": "biome check --write .",
 		"test": "vitest",
 		"test:coverage": "vitest run --coverage",
-		"db:start": "npx supabase start",
-		"db:stop": "npx supabase stop",
-		"db:reset": "npx supabase db reset",
-		"db:types": "npx supabase gen types typescript --local > src/types/database.ts"
+		"db:start": "pnpm supabase start",
+		"db:stop": "pnpm supabase stop",
+		"db:reset": "pnpm supabase db reset",
+		"db:types": "pnpm supabase gen types typescript --local > src/types/database.ts"
 	},
 	"dependencies": {
 		"@supabase/supabase-js": "^2.99.1",
@@ -27,6 +27,13 @@
 		"recharts": "^3.8.0",
 		"tailwind-merge": "^3.5.0",
 		"zustand": "^5.0.12"
+	},
+	"pnpm": {
+		"onlyBuiltDependencies": [
+			"esbuild",
+			"lefthook",
+			"supabase"
+		]
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.4.7",
