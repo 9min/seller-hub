@@ -8,7 +8,10 @@ CREATE TABLE orders (
   quantity       INT         NOT NULL,
   unit_price     INT         NOT NULL,
   total_price    INT         NOT NULL,
-  status         TEXT        NOT NULL,
+  status         TEXT        NOT NULL CHECK (status IN (
+                   'PAYMENT_COMPLETE', 'PREPARING', 'SHIPPED', 'DELIVERED',
+                   'RETURN_REQUESTED', 'EXCHANGE_REQUESTED', 'CANCELLED'
+                 )),
   ordered_at     TIMESTAMPTZ NOT NULL,
   shipped_at     TIMESTAMPTZ,
   delivered_at   TIMESTAMPTZ,

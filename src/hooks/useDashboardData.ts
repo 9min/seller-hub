@@ -26,6 +26,7 @@ export function useDashboardData(period: ChartPeriod = "daily") {
 			}
 		},
 		initialData: FALLBACK_KPI,
+		initialDataUpdatedAt: 0,
 		staleTime: 1000 * 60 * 5,
 	});
 
@@ -40,6 +41,7 @@ export function useDashboardData(period: ChartPeriod = "daily") {
 			}
 		},
 		initialData: () => computeSalesData(FALLBACK_ORDERS, period),
+		initialDataUpdatedAt: 0,
 		staleTime: 1000 * 60 * 5,
 	});
 
@@ -54,6 +56,7 @@ export function useDashboardData(period: ChartPeriod = "daily") {
 			}
 		},
 		initialData: FALLBACK_CATEGORY,
+		initialDataUpdatedAt: 0,
 		staleTime: 1000 * 60 * 5,
 	});
 
