@@ -10,7 +10,7 @@ import { SalesChart } from "./SalesChart";
 export function DashboardContent() {
 	const [period, setPeriod] = useState<ChartPeriod>("daily");
 	const { kpi, sales, category } = useDashboardData(period);
-	const { orders, total, isLoading } = useOrdersData();
+	const { orders, total, isLoading } = useOrdersData({ page: 0, pageSize: 5 });
 
 	return (
 		<div className="space-y-6">

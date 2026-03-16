@@ -21,6 +21,9 @@ const { mockRpc, mockFrom, mockQueryBuilder, getOrdersResult, setOrdersResult } 
 		order: vi.fn().mockReturnThis(),
 		range: vi.fn().mockReturnThis(),
 		or: vi.fn().mockReturnThis(),
+		in: vi.fn().mockReturnThis(),
+		gte: vi.fn().mockReturnThis(),
+		lte: vi.fn().mockReturnThis(),
 		// thenable: await query 를 지원 (biome 의도적 우회)
 		// biome-ignore lint/suspicious/noThenProperty: mock 테이블 빌더에서 thenable 패턴 필요
 		then(
@@ -121,6 +124,9 @@ beforeEach(() => {
 	mockQueryBuilder.order.mockReturnThis();
 	mockQueryBuilder.range.mockReturnThis();
 	mockQueryBuilder.or.mockReturnThis();
+	mockQueryBuilder.in.mockReturnThis();
+	mockQueryBuilder.gte.mockReturnThis();
+	mockQueryBuilder.lte.mockReturnThis();
 	setOrdersResult({ data: [], error: null, count: 0 });
 });
 
@@ -200,6 +206,75 @@ describe("fetchOrders", () => {
 
 		// Assert: 예외 없이 빈 결과 반환
 		expect(result).toEqual({ orders: [], total: 0 });
+	});
+
+	it("statuses 배열이 있으면 .in() 필터를 적용한다", async () => {
+		setOrdersResult({ data: MOCK_ORDER_ROWS, error: null, count: 2 });
+
+		await fetchOrders({ page: 0, pageSize: 100, statuses: ["SHIPPING", "DELIVERED"] });
+
+		expect(mockQueryBuilder.in).toHaveBeenCalledWith("status", ["SHIPPING", "DELIVERED"]);
+	});
+
+	it("statuses가 빈 배열이면 .in() 필터를 적용하지 않는다", async () => {
+		setOrdersResult({ data: MOCK_ORDER_ROWS, error: null, count: 2 });
+
+		await fetchOrders({ page: 0, pageSize: 100, statuses: [] });
+
+		expect(mockQueryBuilder.in).not.toHaveBeenCalled();
+	});
+
+	it("startDate가 있으면 .gte() 필터를 적용한다", async () => {
+		setOrdersResult({ data: MOCK_ORDER_ROWS, error: null, count: 2 });
+
+		await fetchOrders({ page: 0, pageSize: 100, startDate: "2026-01-01" });
+
+		expect(mockQueryBuilder.gte).toHaveBeenCalledWith("ordered_at", "2026-01-01");
+	});
+
+	it("endDate가 있으면 당일 23:59:59.999Z를 포함하여 .lte() 필터를 적용한다", async () => {
+		setOrdersResult({ data: MOCK_ORDER_ROWS, error: null, count: 2 });
+
+		await fetchOrders({ page: 0, pageSize: 100, endDate: "2026-03-16" });
+
+		expect(mockQueryBuilder.lte).toHaveBeenCalledWith("ordered_at", "2026-03-16T23:59:59.999Z");
+	});
+
+	it("sortBy/sortOrder가 있으면 해당 컬럼으로 .order()를 적용한다", async () => {
+		setOrdersResult({ data: MOCK_ORDER_ROWS, error: null, count: 2 });
+
+		await fetchOrders({ page: 0, pageSize: 100, sortBy: "totalPrice", sortOrder: "asc" });
+
+		expect(mockQueryBuilder.order).toHaveBeenCalledWith("total_price", { ascending: true });
+	});
+
+	it("sortBy가 없으면 ordered_at desc로 정렬한다", async () => {
+		setOrdersResult({ data: MOCK_ORDER_ROWS, error: null, count: 2 });
+
+		await fetchOrders({ page: 0, pageSize: 100 });
+
+		expect(mockQueryBuilder.order).toHaveBeenCalledWith("ordered_at", { ascending: false });
+	});
+
+	it("모든 파라미터를 동시에 적용한다", async () => {
+		setOrdersResult({ data: MOCK_ORDER_ROWS, error: null, count: 2 });
+
+		await fetchOrders({
+			page: 0,
+			pageSize: 100,
+			searchQuery: "김민준",
+			statuses: ["SHIPPING"],
+			startDate: "2026-01-01",
+			endDate: "2026-03-16",
+			sortBy: "orderedAt",
+			sortOrder: "desc",
+		});
+
+		expect(mockQueryBuilder.or).toHaveBeenCalled();
+		expect(mockQueryBuilder.in).toHaveBeenCalledWith("status", ["SHIPPING"]);
+		expect(mockQueryBuilder.gte).toHaveBeenCalledWith("ordered_at", "2026-01-01");
+		expect(mockQueryBuilder.lte).toHaveBeenCalledWith("ordered_at", "2026-03-16T23:59:59.999Z");
+		expect(mockQueryBuilder.order).toHaveBeenCalledWith("ordered_at", { ascending: false });
 	});
 });
 

@@ -5,10 +5,23 @@ import type { KpiMetric, KpiTrend } from "@/types/kpi";
 import type { Order } from "@/types/order";
 import { formatCount, formatCurrency, formatPercent } from "@/utils/formatNumber";
 
+export type SortableColumn = "orderedAt" | "totalPrice" | "quantity";
+
+const SORT_COLUMN_MAP: Record<SortableColumn, string> = {
+	orderedAt: "ordered_at",
+	totalPrice: "total_price",
+	quantity: "quantity",
+};
+
 export interface FetchOrdersParams {
 	page: number; // 0-based
 	pageSize: number; // 기본값 100
 	searchQuery?: string;
+	statuses?: import("@/types/order").OrderStatus[];
+	startDate?: string; // YYYY-MM-DD
+	endDate?: string; // YYYY-MM-DD
+	sortBy?: SortableColumn;
+	sortOrder?: "asc" | "desc";
 }
 
 export interface FetchOrdersResult {
@@ -36,17 +49,32 @@ function rowToOrder(row: Record<string, unknown>): Order {
 }
 
 export async function fetchOrders(params: FetchOrdersParams): Promise<FetchOrdersResult> {
-	const { page, pageSize, searchQuery } = params;
+	const { page, pageSize, searchQuery, statuses, startDate, endDate, sortBy, sortOrder } = params;
+
+	const sortColumn = sortBy ? (SORT_COLUMN_MAP[sortBy] ?? "ordered_at") : "ordered_at";
+	const ascending = sortOrder === "asc";
 
 	let query = supabase
 		.from("orders")
 		.select("*", { count: "exact" })
-		.order("ordered_at", { ascending: false })
+		.order(sortColumn, { ascending })
 		.range(page * pageSize, (page + 1) * pageSize - 1);
 
 	if (searchQuery?.trim()) {
 		const q = searchQuery.trim();
 		query = query.or(`order_number.ilike.%${q}%,buyer_name.ilike.%${q}%,product_name.ilike.%${q}%`);
+	}
+
+	if (statuses && statuses.length > 0) {
+		query = query.in("status", statuses);
+	}
+
+	if (startDate) {
+		query = query.gte("ordered_at", startDate);
+	}
+
+	if (endDate) {
+		query = query.lte("ordered_at", `${endDate}T23:59:59.999Z`);
 	}
 
 	const { data, error, count } = await query;

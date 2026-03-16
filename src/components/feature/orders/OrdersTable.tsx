@@ -1,4 +1,10 @@
-import { type ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
+import {
+	type ColumnDef,
+	flexRender,
+	getCoreRowModel,
+	type SortingState,
+	useReactTable,
+} from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { memo, useMemo, useRef } from "react";
 import { Card } from "@/components/ui/Card";
@@ -16,12 +22,31 @@ interface OrdersTableProps {
 	searchQuery: string;
 	onSearchChange: (value: string) => void;
 	onPageChange: (page: number) => void;
+	sortBy?: string;
+	sortOrder?: "asc" | "desc";
+	onSortChange?: (sortBy: string, sortOrder: "asc" | "desc") => void;
 	isLoading?: boolean;
 	isFetching?: boolean;
 }
 
 const ROW_HEIGHT = 48;
 const TABLE_HEIGHT = 560;
+
+// 정렬 가능한 컬럼 id → camelCase 키 매핑
+const SORTABLE_COLUMNS = new Set(["orderedAt", "totalPrice", "quantity"]);
+
+function SortIcon({
+	columnId,
+	sortBy,
+	sortOrder,
+}: {
+	columnId: string;
+	sortBy: string;
+	sortOrder: "asc" | "desc";
+}) {
+	if (columnId !== sortBy) return <span className="ml-1 text-gray-300">↕</span>;
+	return <span className="ml-1">{sortOrder === "asc" ? "↑" : "↓"}</span>;
+}
 
 export const OrdersTable = memo(function OrdersTable({
 	orders,
@@ -31,10 +56,16 @@ export const OrdersTable = memo(function OrdersTable({
 	searchQuery,
 	onSearchChange,
 	onPageChange,
+	sortBy = "",
+	sortOrder = "desc",
+	onSortChange,
 	isLoading,
 	isFetching,
 }: OrdersTableProps) {
 	const parentRef = useRef<HTMLDivElement>(null);
+
+	// TanStack Table 정렬 상태를 외부 props에서 파생
+	const sorting: SortingState = sortBy ? [{ id: sortBy, desc: sortOrder === "desc" }] : [];
 
 	const columns = useMemo<ColumnDef<Order>[]>(
 		() => [
@@ -42,37 +73,44 @@ export const OrdersTable = memo(function OrdersTable({
 				accessorKey: "orderNumber",
 				header: "주문번호",
 				size: 160,
+				enableSorting: false,
 			},
 			{
 				accessorKey: "orderedAt",
 				header: "주문일시",
 				size: 160,
+				enableSorting: true,
 				cell: ({ getValue }) => formatDateTime(getValue<string>()),
 			},
 			{
 				accessorKey: "buyerName",
 				header: "구매자명",
 				size: 100,
+				enableSorting: false,
 			},
 			{
 				accessorKey: "productName",
 				header: "상품명",
 				size: 200,
+				enableSorting: false,
 			},
 			{
 				accessorKey: "category",
 				header: "카테고리",
 				size: 100,
+				enableSorting: false,
 			},
 			{
 				accessorKey: "quantity",
 				header: "수량",
 				size: 60,
+				enableSorting: true,
 			},
 			{
 				accessorKey: "totalPrice",
 				header: "금액",
 				size: 120,
+				enableSorting: true,
 				cell: ({ getValue }) =>
 					new Intl.NumberFormat("ko-KR", {
 						style: "currency",
@@ -84,6 +122,7 @@ export const OrdersTable = memo(function OrdersTable({
 				accessorKey: "status",
 				header: "상태",
 				size: 110,
+				enableSorting: false,
 				cell: ({ getValue }) => <OrderStatusBadge status={getValue<OrderStatus>()} />,
 			},
 		],
@@ -94,6 +133,20 @@ export const OrdersTable = memo(function OrdersTable({
 		data: orders,
 		columns,
 		getCoreRowModel: getCoreRowModel(),
+		manualSorting: true,
+		state: { sorting },
+		onSortingChange: (updater) => {
+			const newSorting = typeof updater === "function" ? updater(sorting) : updater;
+			if (newSorting.length > 0 && onSortChange) {
+				const first = newSorting[0];
+				if (first) {
+					onSortChange(first.id, first.desc ? "desc" : "asc");
+				}
+			} else if (newSorting.length === 0 && onSortChange) {
+				// 정렬 해제 시 기본값으로 복귀
+				onSortChange("orderedAt", "desc");
+			}
+		},
 	});
 
 	const rows = table.getRowModel().rows;
@@ -136,15 +189,29 @@ export const OrdersTable = memo(function OrdersTable({
 						<thead className="sticky top-0 z-10 bg-gray-50 border-b border-gray-200">
 							{table.getHeaderGroups().map((headerGroup) => (
 								<tr key={headerGroup.id}>
-									{headerGroup.headers.map((header) => (
-										<th
-											key={header.id}
-											style={{ width: header.getSize() }}
-											className="px-3 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wide whitespace-nowrap"
-										>
-											{flexRender(header.column.columnDef.header, header.getContext())}
-										</th>
-									))}
+									{headerGroup.headers.map((header) => {
+										const canSort = SORTABLE_COLUMNS.has(header.id);
+										return (
+											<th
+												key={header.id}
+												style={{ width: header.getSize() }}
+												className="px-3 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wide whitespace-nowrap"
+											>
+												{canSort ? (
+													<button
+														type="button"
+														onClick={header.column.getToggleSortingHandler()}
+														className="flex items-center gap-0.5 hover:text-gray-700 transition-colors"
+													>
+														{flexRender(header.column.columnDef.header, header.getContext())}
+														<SortIcon columnId={header.id} sortBy={sortBy} sortOrder={sortOrder} />
+													</button>
+												) : (
+													flexRender(header.column.columnDef.header, header.getContext())
+												)}
+											</th>
+										);
+									})}
 								</tr>
 							))}
 						</thead>

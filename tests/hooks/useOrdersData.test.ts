@@ -1,8 +1,10 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { act, renderHook, waitFor } from "@testing-library/react";
+import { renderHook, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { __resetDbEmpty, useOrdersData } from "@/hooks/useOrdersData";
+import type { FetchOrdersParams } from "@/services/orderService";
+import type { OrderStatus } from "@/types/order";
 
 const MOCK_ORDERS = [
 	{
@@ -36,6 +38,11 @@ function createWrapper() {
 		QueryClientProvider({ client: queryClient, children });
 }
 
+const DEFAULT_PARAMS: FetchOrdersParams = {
+	page: 0,
+	pageSize: 100,
+};
+
 beforeEach(() => {
 	vi.clearAllMocks();
 	__resetDbEmpty();
@@ -44,7 +51,7 @@ beforeEach(() => {
 
 describe("useOrdersData", () => {
 	it("주문 데이터를 반환한다", async () => {
-		const { result } = renderHook(() => useOrdersData(), {
+		const { result } = renderHook(() => useOrdersData(DEFAULT_PARAMS), {
 			wrapper: createWrapper(),
 		});
 
@@ -55,56 +62,80 @@ describe("useOrdersData", () => {
 	});
 
 	it("isFetching 상태를 반환한다", () => {
-		const { result } = renderHook(() => useOrdersData(), {
+		const { result } = renderHook(() => useOrdersData(DEFAULT_PARAMS), {
 			wrapper: createWrapper(),
 		});
 
 		expect(typeof result.current.isFetching).toBe("boolean");
 	});
 
-	it("초기 page는 0이다", () => {
-		const { result } = renderHook(() => useOrdersData(), {
+	it("params를 fetchOrders에 전달한다", async () => {
+		const { result } = renderHook(() => useOrdersData(DEFAULT_PARAMS), {
 			wrapper: createWrapper(),
 		});
 
-		expect(result.current.page).toBe(0);
-	});
-
-	it("setPage로 page를 변경할 수 있다", async () => {
-		const { result } = renderHook(() => useOrdersData(), {
-			wrapper: createWrapper(),
-		});
-
-		act(() => {
-			result.current.setPage(2);
-		});
-
-		expect(result.current.page).toBe(2);
-	});
-
-	it("setSearchQuery로 searchQuery를 변경하면 fetchOrders가 재호출된다", async () => {
-		const { result } = renderHook(() => useOrdersData(), {
-			wrapper: createWrapper(),
-		});
-
-		// 초기 쿼리 완료 대기
 		await waitFor(() => expect(result.current.total).toBe(1));
 
-		act(() => {
-			result.current.setSearchQuery("김민준");
+		expect(mockFetchOrders).toHaveBeenCalledWith(expect.objectContaining(DEFAULT_PARAMS));
+	});
+
+	it("statuses 파라미터를 fetchOrders에 전달한다", async () => {
+		const params: FetchOrdersParams = {
+			...DEFAULT_PARAMS,
+			statuses: ["SHIPPING", "PREPARING"],
+		};
+
+		const { result } = renderHook(() => useOrdersData(params), {
+			wrapper: createWrapper(),
 		});
 
-		await waitFor(() =>
-			expect(mockFetchOrders).toHaveBeenCalledWith(
-				expect.objectContaining({ searchQuery: "김민준" }),
-			),
+		await waitFor(() => expect(result.current.total).toBe(1));
+
+		expect(mockFetchOrders).toHaveBeenCalledWith(
+			expect.objectContaining({ statuses: ["SHIPPING", "PREPARING"] }),
+		);
+	});
+
+	it("startDate/endDate 파라미터를 fetchOrders에 전달한다", async () => {
+		const params: FetchOrdersParams = {
+			...DEFAULT_PARAMS,
+			startDate: "2026-01-01",
+			endDate: "2026-03-16",
+		};
+
+		const { result } = renderHook(() => useOrdersData(params), {
+			wrapper: createWrapper(),
+		});
+
+		await waitFor(() => expect(result.current.total).toBe(1));
+
+		expect(mockFetchOrders).toHaveBeenCalledWith(
+			expect.objectContaining({ startDate: "2026-01-01", endDate: "2026-03-16" }),
+		);
+	});
+
+	it("sortBy/sortOrder 파라미터를 fetchOrders에 전달한다", async () => {
+		const params: FetchOrdersParams = {
+			...DEFAULT_PARAMS,
+			sortBy: "totalPrice",
+			sortOrder: "asc",
+		};
+
+		const { result } = renderHook(() => useOrdersData(params), {
+			wrapper: createWrapper(),
+		});
+
+		await waitFor(() => expect(result.current.total).toBe(1));
+
+		expect(mockFetchOrders).toHaveBeenCalledWith(
+			expect.objectContaining({ sortBy: "totalPrice", sortOrder: "asc" }),
 		);
 	});
 
 	it("DB가 비어있으면(total=0) 더미 데이터를 반환한다", async () => {
 		mockFetchOrders.mockResolvedValue({ orders: [], total: 0 });
 
-		const { result } = renderHook(() => useOrdersData(), {
+		const { result } = renderHook(() => useOrdersData(DEFAULT_PARAMS), {
 			wrapper: createWrapper(),
 		});
 
@@ -113,35 +144,68 @@ describe("useOrdersData", () => {
 		expect(result.current.total).toBeGreaterThan(0); // 더미 데이터 폴백
 	});
 
-	it("page 1 이상에서 빈 결과를 받아도 이후 페이지 API 호출이 계속된다", async () => {
-		// Arrange: page 0 성공, page 1 빈 결과(범위 초과), page 2 성공
-		mockFetchOrders
-			.mockResolvedValueOnce({ orders: MOCK_ORDERS, total: 1 }) // page 0: 정상
-			.mockResolvedValueOnce({ orders: [], total: 0 }) // page 1: PGRST103 응답
-			.mockResolvedValue({ orders: MOCK_ORDERS, total: 1 }); // page 2: 정상
+	it("DB 빈 테이블 시 statuses 필터를 더미 데이터에 적용한다", async () => {
+		mockFetchOrders.mockResolvedValue({ orders: [], total: 0 });
 
-		const { result } = renderHook(() => useOrdersData(), {
+		const params: FetchOrdersParams = {
+			...DEFAULT_PARAMS,
+			statuses: ["SHIPPING"] as OrderStatus[],
+		};
+
+		const { result } = renderHook(() => useOrdersData(params), {
 			wrapper: createWrapper(),
 		});
 
-		// page 0 fetch 완료 대기
-		await waitFor(() => expect(result.current.total).toBe(1));
+		await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-		// page 1로 이동 (빈 결과)
-		act(() => {
-			result.current.setPage(1);
-		});
-		await waitFor(() =>
-			expect(mockFetchOrders).toHaveBeenCalledWith(expect.objectContaining({ page: 1 })),
-		);
+		// 반환된 주문 중 SHIPPING 상태만 존재해야 한다
+		expect(result.current.orders.every((o) => o.status === "SHIPPING")).toBe(true);
+	});
 
-		// page 2로 이동 - dbEmpty가 잘못 설정되지 않았다면 API 호출이 일어나야 함
-		act(() => {
-			result.current.setPage(2);
+	it("DB 빈 테이블 시 기간 필터를 더미 데이터에 적용한다", async () => {
+		mockFetchOrders.mockResolvedValue({ orders: [], total: 0 });
+
+		const params: FetchOrdersParams = {
+			...DEFAULT_PARAMS,
+			startDate: "2099-01-01",
+			endDate: "2099-12-31",
+		};
+
+		const { result } = renderHook(() => useOrdersData(params), {
+			wrapper: createWrapper(),
 		});
-		await waitFor(
-			() => expect(mockFetchOrders).toHaveBeenCalledWith(expect.objectContaining({ page: 2 })),
-			{ timeout: 3000 },
-		);
+
+		await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+		// 미래 날짜 범위이므로 더미 데이터에 해당 기간의 주문이 없어 total이 0이어야 한다
+		expect(result.current.total).toBe(0);
+	});
+
+	it("DB 빈 테이블 시 totalPrice 내림차순 정렬을 더미 데이터에 적용한다", async () => {
+		mockFetchOrders.mockResolvedValue({ orders: [], total: 0 });
+
+		const params: FetchOrdersParams = {
+			...DEFAULT_PARAMS,
+			sortBy: "totalPrice",
+			sortOrder: "desc",
+		};
+
+		const { result } = renderHook(() => useOrdersData(params), {
+			wrapper: createWrapper(),
+		});
+
+		await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+		const orders = result.current.orders;
+		expect(orders.length).toBeGreaterThan(0);
+
+		// totalPrice 내림차순 확인
+		for (let i = 0; i < orders.length - 1; i++) {
+			const current = orders[i];
+			const next = orders[i + 1];
+			if (current && next) {
+				expect(current.totalPrice).toBeGreaterThanOrEqual(next.totalPrice);
+			}
+		}
 	});
 });
