@@ -52,8 +52,11 @@ export async function fetchProducts(params: FetchProductsParams): Promise<FetchP
 		.order(sortColumn, { ascending });
 
 	if (searchQuery?.trim()) {
-		const q = searchQuery.trim();
-		query = query.or(`name.ilike.%${q}%,sku.ilike.%${q}%`);
+		// PostgREST 메타문자 이스케이프 (쉼표, 마침표, 괄호 등)
+		const q = searchQuery.trim().replace(/[,%.()"\\]/g, "");
+		if (q) {
+			query = query.or(`name.ilike.%${q}%,sku.ilike.%${q}%`);
+		}
 	}
 
 	if (categories && categories.length > 0) {
