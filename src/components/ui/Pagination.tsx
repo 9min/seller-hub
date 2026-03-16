@@ -6,15 +6,16 @@ interface PaginationProps {
 	pageSize: number;
 	total: number;
 	onPageChange: (page: number) => void;
+	isFetching?: boolean;
 }
 
-export function Pagination({ page, pageSize, total, onPageChange }: PaginationProps) {
+export function Pagination({ page, pageSize, total, onPageChange, isFetching }: PaginationProps) {
 	const from = total === 0 ? 0 : page * pageSize + 1;
 	const to = Math.min((page + 1) * pageSize, total);
 	const lastPage = Math.max(0, Math.ceil(total / pageSize) - 1);
 
-	const isFirst = page === 0;
-	const isLast = page >= lastPage;
+	const isFirst = page === 0 || isFetching;
+	const isLast = page >= lastPage || !!isFetching;
 
 	return (
 		<div className="flex items-center justify-between px-4 py-3 border-t border-gray-200">

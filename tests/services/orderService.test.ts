@@ -183,6 +183,24 @@ describe("fetchOrders", () => {
 
 		await expect(fetchOrders({ page: 0, pageSize: 100 })).rejects.toThrow("DB 오류");
 	});
+
+	it("PGRST103 에러 발생 시 빈 배열과 total 0을 반환하고 예외를 던지지 않는다", async () => {
+		// Arrange: Supabase range 초과 에러 (page가 데이터 범위를 벗어날 때 발생)
+		setOrdersResult({
+			data: null,
+			error: {
+				code: "PGRST103",
+				message: "An offset of 100 was requested, but there are only 0 rows.",
+			},
+			count: 0,
+		});
+
+		// Act
+		const result = await fetchOrders({ page: 1, pageSize: 100 });
+
+		// Assert: 예외 없이 빈 결과 반환
+		expect(result).toEqual({ orders: [], total: 0 });
+	});
 });
 
 // ──────────────────────────────────────────────
