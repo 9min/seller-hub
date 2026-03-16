@@ -2,6 +2,7 @@ import { useSearchParams } from "react-router-dom";
 import { OrdersFilterBar } from "@/components/feature/orders/OrdersFilterBar";
 import { OrdersTable } from "@/components/feature/orders/OrdersTable";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { ORDER_STATUS_LABEL } from "@/constants/orderStatus";
 import { useOrdersData } from "@/hooks/useOrdersData";
 import type { FetchOrdersParams, SortableColumn } from "@/services/orderService";
 import type { OrderStatus } from "@/types/order";
@@ -11,16 +12,8 @@ const PAGE_SIZE = 100;
 // 허용된 sortBy 값 목록 (입력 검증)
 const ALLOWED_SORT_BY: SortableColumn[] = ["orderedAt", "totalPrice", "quantity"];
 
-// 허용된 OrderStatus 값 목록 (입력 검증)
-const ALLOWED_STATUSES: OrderStatus[] = [
-	"PAYMENT_COMPLETE",
-	"PREPARING",
-	"SHIPPING",
-	"DELIVERED",
-	"RETURN_REQUESTED",
-	"EXCHANGE_REQUESTED",
-	"CANCELLED",
-];
+// ORDER_STATUS_LABEL 키에서 파생 — 신규 상태 추가 시 한 곳만 수정
+const ALLOWED_STATUSES = Object.keys(ORDER_STATUS_LABEL) as OrderStatus[];
 
 function parseOrdersSearchParams(searchParams: URLSearchParams): FetchOrdersParams {
 	const page = Math.max(0, Number(searchParams.get("page") ?? "0") || 0);

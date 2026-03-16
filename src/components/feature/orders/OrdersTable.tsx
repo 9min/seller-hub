@@ -32,9 +32,6 @@ interface OrdersTableProps {
 const ROW_HEIGHT = 48;
 const TABLE_HEIGHT = 560;
 
-// 정렬 가능한 컬럼 id → camelCase 키 매핑
-const SORTABLE_COLUMNS = new Set(["orderedAt", "totalPrice", "quantity"]);
-
 function SortIcon({
 	columnId,
 	sortBy,
@@ -190,7 +187,7 @@ export const OrdersTable = memo(function OrdersTable({
 							{table.getHeaderGroups().map((headerGroup) => (
 								<tr key={headerGroup.id}>
 									{headerGroup.headers.map((header) => {
-										const canSort = SORTABLE_COLUMNS.has(header.id);
+										const canSort = header.column.getCanSort();
 										return (
 											<th
 												key={header.id}

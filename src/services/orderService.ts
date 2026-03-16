@@ -2,7 +2,7 @@ import { CATEGORY_COLORS, DEFAULT_CATEGORY_COLOR } from "@/constants/orderStatus
 import { supabase } from "@/lib/supabase";
 import type { CategoryDataPoint, ChartPeriod, SalesDataPoint } from "@/types/chart";
 import type { KpiMetric, KpiTrend } from "@/types/kpi";
-import type { Order } from "@/types/order";
+import type { Order, OrderStatus } from "@/types/order";
 import { formatCount, formatCurrency, formatPercent } from "@/utils/formatNumber";
 
 export type SortableColumn = "orderedAt" | "totalPrice" | "quantity";
@@ -17,7 +17,7 @@ export interface FetchOrdersParams {
 	page: number; // 0-based
 	pageSize: number; // 기본값 100
 	searchQuery?: string;
-	statuses?: import("@/types/order").OrderStatus[];
+	statuses?: OrderStatus[];
 	startDate?: string; // YYYY-MM-DD
 	endDate?: string; // YYYY-MM-DD
 	sortBy?: SortableColumn;

@@ -208,4 +208,33 @@ describe("useOrdersData", () => {
 			}
 		}
 	});
+
+	it("page 1 이상에서 빈 결과를 받아도 이후 페이지 API 호출이 계속된다", async () => {
+		// Arrange: page 0 성공, page 1 빈 결과(범위 초과), page 2 성공
+		mockFetchOrders
+			.mockResolvedValueOnce({ orders: MOCK_ORDERS, total: 1 }) // page 0: 정상
+			.mockResolvedValueOnce({ orders: [], total: 0 }) // page 1: PGRST103 응답
+			.mockResolvedValue({ orders: MOCK_ORDERS, total: 1 }); // page 2: 정상
+
+		const { result, rerender } = renderHook(
+			({ page }: { page: number }) => useOrdersData({ ...DEFAULT_PARAMS, page }),
+			{ wrapper: createWrapper(), initialProps: { page: 0 } },
+		);
+
+		// page 0 fetch 완료 대기
+		await waitFor(() => expect(result.current.total).toBe(1));
+
+		// page 1로 이동 (빈 결과) — dbEmpty가 잘못 설정되면 안 됨
+		rerender({ page: 1 });
+		await waitFor(() =>
+			expect(mockFetchOrders).toHaveBeenCalledWith(expect.objectContaining({ page: 1 })),
+		);
+
+		// page 2로 이동 — dbEmpty가 잘못 설정되지 않았다면 API 호출이 일어나야 함
+		rerender({ page: 2 });
+		await waitFor(
+			() => expect(mockFetchOrders).toHaveBeenCalledWith(expect.objectContaining({ page: 2 })),
+			{ timeout: 3000 },
+		);
+	});
 });
