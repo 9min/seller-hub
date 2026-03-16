@@ -74,36 +74,38 @@ export type Database = {
 		};
 		Functions: {
 			get_analytics_summary: {
-				Args: { p_period: number };
+				Args: { p_days: number };
 				Returns: Array<{
 					total_revenue: number;
 					total_orders: number;
-					avg_order_value: number;
-					return_rate: number;
+					avg_unit_price: number;
+					revenue_growth_rate: number;
 				}>;
 			};
 			get_analytics_trend: {
-				Args: { p_period: number };
+				Args: { p_days: number };
 				Returns: Array<{
-					date: string;
-					revenue: number;
-					orders: number;
+					day_index: number;
+					label: string;
+					current_revenue: number;
+					previous_revenue: number;
 				}>;
 			};
 			get_analytics_category: {
-				Args: { p_period: number };
+				Args: { p_days: number };
 				Returns: Array<{
-					category: string;
+					name: string;
 					revenue: number;
-					orders: number;
 				}>;
 			};
 			get_analytics_top_products: {
-				Args: { p_period: number };
+				Args: { p_days: number };
 				Returns: Array<{
+					rank: number;
 					product_name: string;
+					category: string;
+					quantity: number;
 					revenue: number;
-					orders: number;
 				}>;
 			};
 			get_kpi_metrics: {

@@ -3,7 +3,7 @@ import { supabase } from "@/lib/supabase";
 import type { CategoryDataPoint, ChartPeriod, SalesDataPoint } from "@/types/chart";
 import type { Database } from "@/types/database";
 import type { KpiMetric, KpiTrend } from "@/types/kpi";
-import type { Order } from "@/types/order";
+import type { Order, OrderStatus } from "@/types/order";
 import { formatCount, formatCurrency, formatPercent } from "@/utils/formatNumber";
 
 type OrderRow = Database["public"]["Tables"]["orders"]["Row"];
