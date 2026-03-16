@@ -1,18 +1,18 @@
 import { cn } from "@/utils/cn";
 
-interface TabItem<T extends string> {
+interface TabItem<T extends string | number> {
 	value: T;
 	label: string;
 }
 
-interface TabGroupProps<T extends string> {
+interface TabGroupProps<T extends string | number> {
 	items: TabItem<T>[];
 	value: T;
 	onChange: (value: T) => void;
 	className?: string;
 }
 
-export function TabGroup<T extends string>({
+export function TabGroup<T extends string | number>({
 	items,
 	value,
 	onChange,
