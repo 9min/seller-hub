@@ -15,7 +15,9 @@
 		"db:reset": "pnpm supabase db reset",
 		"db:types": "pnpm supabase gen types typescript --local > src/types/database.ts",
 		"generate:seed": "tsx scripts/generateSeed.ts > supabase/seed.sql",
-		"seed:remote": "tsx --env-file .env.local scripts/seedRemote.ts"
+		"seed:remote": "tsx --env-file .env.local scripts/seedRemote.ts",
+		"migrate:remote": "tsx --env-file .env.local scripts/applyMigration.ts",
+		"seed:products": "tsx --env-file .env.local scripts/seedProducts.ts"
 	},
 	"dependencies": {
 		"@supabase/supabase-js": "^2.99.1",
@@ -39,6 +41,7 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.4.7",
+		"@playwright/test": "^1.58.2",
 		"@tailwindcss/vite": "^4.2.1",
 		"@testing-library/jest-dom": "^6.9.1",
 		"@testing-library/react": "^16.3.2",
