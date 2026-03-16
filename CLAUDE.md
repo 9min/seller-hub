@@ -44,6 +44,8 @@
 
 - GitHub Flow 기반: `main` → `feature/*`, `fix/*`, `hotfix/*`
 - 직접 `main` 푸시 금지. 반드시 PR을 통해 머지한다.
+- **Claude Code는 항상 작업 브랜치(`feature/*` 등)를 생성하여 작업한다.** `main`/`master`에 직접 커밋하지 않는다.
+- **Claude Code는 명시적으로 요청받기 전까지 `git commit`, `git push`를 실행하지 않는다.**
 
 ### 커밋 컨벤션
 
