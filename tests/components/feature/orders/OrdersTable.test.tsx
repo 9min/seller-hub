@@ -13,6 +13,9 @@ const defaultProps = {
 	searchQuery: "",
 	onSearchChange: () => undefined,
 	onPageChange: () => undefined,
+	sortBy: "orderedAt",
+	sortOrder: "desc" as const,
+	onSortChange: () => undefined,
 };
 
 describe("OrdersTable", () => {
@@ -59,5 +62,48 @@ describe("OrdersTable", () => {
 		// total=200, page=0, pageSize=100 → lastPage=1, isLast=false → 활성화
 		render(<OrdersTable {...defaultProps} total={200} isFetching={false} />);
 		expect(screen.getByText("다음")).not.toBeDisabled();
+	});
+
+	it("정렬 가능한 열 헤더(주문일시, 금액, 수량)에 정렬 아이콘을 렌더링한다", () => {
+		render(<OrdersTable {...defaultProps} />);
+
+		// 정렬 가능한 헤더는 버튼 역할로 렌더링된다
+		expect(screen.getByRole("button", { name: /주문일시/ })).toBeInTheDocument();
+		expect(screen.getByRole("button", { name: /금액/ })).toBeInTheDocument();
+		expect(screen.getByRole("button", { name: /수량/ })).toBeInTheDocument();
+	});
+
+	it("현재 정렬 중인 열(orderedAt)에 활성 아이콘이 표시된다", () => {
+		render(<OrdersTable {...defaultProps} sortBy="orderedAt" sortOrder="desc" />);
+
+		const sortButton = screen.getByRole("button", { name: /주문일시/ });
+		expect(sortButton).toBeInTheDocument();
+		// 활성 정렬 아이콘 포함 여부 확인 (↓)
+		expect(sortButton.textContent).toContain("↓");
+	});
+
+	it("정렬 컬럼 헤더 클릭 시 onSortChange가 호출된다", () => {
+		const handleSortChange = vi.fn();
+		render(<OrdersTable {...defaultProps} sortBy="" onSortChange={handleSortChange} />);
+
+		fireEvent.click(screen.getByRole("button", { name: /금액/ }));
+
+		expect(handleSortChange).toHaveBeenCalledWith("totalPrice", "desc");
+	});
+
+	it("동일 열 재클릭 시 정렬 방향이 반전된다 (desc → asc)", () => {
+		const handleSortChange = vi.fn();
+		render(
+			<OrdersTable
+				{...defaultProps}
+				sortBy="totalPrice"
+				sortOrder="desc"
+				onSortChange={handleSortChange}
+			/>,
+		);
+
+		fireEvent.click(screen.getByRole("button", { name: /금액/ }));
+
+		expect(handleSortChange).toHaveBeenCalledWith("totalPrice", "asc");
 	});
 });
