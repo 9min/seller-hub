@@ -1,6 +1,5 @@
 import type {
 	AnalyticsCategoryPoint,
-	AnalyticsPeriod,
 	AnalyticsSummary,
 	AnalyticsTopProduct,
 	AnalyticsTrendPoint,
@@ -261,10 +260,7 @@ export function generateProducts(count: number): Product[] {
 
 // ─── 매출 분석 더미 데이터 ────────────────────────────────────────────────────
 
-export function computeAnalyticsSummary(
-	orders: Order[],
-	period: AnalyticsPeriod,
-): AnalyticsSummary {
+export function computeAnalyticsSummary(orders: Order[], period: number): AnalyticsSummary {
 	const now = Date.now();
 	const cutoff = now - period * 86400000;
 	const prevCutoff = cutoff - period * 86400000;
@@ -299,10 +295,7 @@ export function computeAnalyticsSummary(
 	};
 }
 
-export function computeAnalyticsTrend(
-	orders: Order[],
-	period: AnalyticsPeriod,
-): AnalyticsTrendPoint[] {
+export function computeAnalyticsTrend(orders: Order[], period: number): AnalyticsTrendPoint[] {
 	const now = Date.now();
 	const cutoff = now - period * 86400000;
 
@@ -339,7 +332,7 @@ export function computeAnalyticsTrend(
 
 export function computeAnalyticsCategory(
 	orders: Order[],
-	period: AnalyticsPeriod,
+	period: number,
 ): AnalyticsCategoryPoint[] {
 	const now = Date.now();
 	const cutoff = now - period * 86400000;
@@ -360,7 +353,7 @@ export function computeAnalyticsCategory(
 
 export function computeAnalyticsTopProducts(
 	orders: Order[],
-	period: AnalyticsPeriod,
+	period: number,
 	limit = 10,
 ): AnalyticsTopProduct[] {
 	const now = Date.now();

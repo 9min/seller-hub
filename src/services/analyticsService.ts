@@ -2,14 +2,13 @@ import { CATEGORY_COLORS, DEFAULT_CATEGORY_COLOR } from "@/constants/orderStatus
 import { supabase } from "@/lib/supabase";
 import type {
 	AnalyticsCategoryPoint,
-	AnalyticsPeriod,
 	AnalyticsSummary,
 	AnalyticsTopProduct,
 	AnalyticsTrendPoint,
 } from "@/types/analytics";
 import { formatCurrency } from "@/utils/formatNumber";
 
-export async function fetchAnalyticsSummary(days: AnalyticsPeriod): Promise<AnalyticsSummary> {
+export async function fetchAnalyticsSummary(days: number): Promise<AnalyticsSummary> {
 	const { data, error } = await supabase.rpc("get_analytics_summary", { p_days: days });
 	if (error) throw error;
 
@@ -36,7 +35,7 @@ export async function fetchAnalyticsSummary(days: AnalyticsPeriod): Promise<Anal
 	};
 }
 
-export async function fetchAnalyticsTrend(days: AnalyticsPeriod): Promise<AnalyticsTrendPoint[]> {
+export async function fetchAnalyticsTrend(days: number): Promise<AnalyticsTrendPoint[]> {
 	const { data, error } = await supabase.rpc("get_analytics_trend", { p_days: days });
 	if (error) throw error;
 
@@ -54,9 +53,7 @@ export async function fetchAnalyticsTrend(days: AnalyticsPeriod): Promise<Analyt
 	}));
 }
 
-export async function fetchAnalyticsCategory(
-	days: AnalyticsPeriod,
-): Promise<AnalyticsCategoryPoint[]> {
+export async function fetchAnalyticsCategory(days: number): Promise<AnalyticsCategoryPoint[]> {
 	const { data, error } = await supabase.rpc("get_analytics_category", { p_days: days });
 	if (error) throw error;
 
@@ -69,9 +66,7 @@ export async function fetchAnalyticsCategory(
 	}));
 }
 
-export async function fetchAnalyticsTopProducts(
-	days: AnalyticsPeriod,
-): Promise<AnalyticsTopProduct[]> {
+export async function fetchAnalyticsTopProducts(days: number): Promise<AnalyticsTopProduct[]> {
 	const { data, error } = await supabase.rpc("get_analytics_top_products", { p_days: days });
 	if (error) throw error;
 

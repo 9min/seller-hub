@@ -1,6 +1,6 @@
 import type { KpiTrend } from "@/types/kpi";
 
-export type AnalyticsPeriod = 7 | 30 | 90;
+export type AnalyticsPeriod = 7 | 30 | 90 | "custom";
 
 export interface AnalyticsSummary {
 	totalRevenue: number;
