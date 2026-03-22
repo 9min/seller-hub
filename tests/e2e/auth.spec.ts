@@ -18,7 +18,7 @@ test.describe("인증 플로우", () => {
 	test("로그인 성공 후 대시보드로 이동", async ({ page }) => {
 		await login(page);
 		await expect(page).toHaveURL("/");
-		await expect(page.getByText("대시보드")).toBeVisible({ timeout: 10000 });
+		await expect(page.getByRole("heading", { name: "대시보드" })).toBeVisible({ timeout: 10000 });
 	});
 
 	test("로그아웃 후 /login으로 리다이렉트", async ({ page }) => {

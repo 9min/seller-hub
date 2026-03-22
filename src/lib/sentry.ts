@@ -10,7 +10,7 @@ export function initSentry() {
 	Sentry.init({
 		dsn,
 		environment: import.meta.env.MODE,
-		enabled: import.meta.env.PROD,
+		enabled: true,
 		tracesSampleRate: 0.1,
 	});
 }

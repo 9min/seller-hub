@@ -9,3 +9,5 @@ coverage/
 .supabase/
 *.tsbuildinfo
 .claude/
+playwright-report/
+test-results/
