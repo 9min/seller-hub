@@ -7,6 +7,7 @@ import {
 } from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { memo, useEffect, useMemo, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/Card";
 import { Pagination } from "@/components/ui/Pagination";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -84,6 +85,14 @@ export const OrdersTable = memo(function OrdersTable({
 				header: "주문번호",
 				size: 160,
 				enableSorting: false,
+				cell: ({ row, getValue }) => (
+					<Link
+						to={`/orders/${row.original.id}`}
+						className="text-primary-600 hover:text-primary-700 hover:underline"
+					>
+						{getValue<string>()}
+					</Link>
+				),
 			},
 			{
 				accessorKey: "orderedAt",

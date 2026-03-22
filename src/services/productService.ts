@@ -1,6 +1,11 @@
 import { supabase } from "@/lib/supabase";
 import type { Database } from "@/types/database";
-import type { Product, ProductStatus } from "@/types/product";
+import type {
+	CreateProductInput,
+	Product,
+	ProductStatus,
+	UpdateProductInput,
+} from "@/types/product";
 
 type ProductRow = Database["public"]["Tables"]["products"]["Row"];
 
@@ -41,6 +46,49 @@ function rowToProduct(row: ProductRow): Product {
 		createdAt: row.created_at,
 		updatedAt: row.updated_at,
 	};
+}
+
+export async function createProduct(input: CreateProductInput): Promise<Product> {
+	const { data, error } = await supabase
+		.from("products")
+		.insert({
+			sku: input.sku,
+			name: input.name,
+			category: input.category,
+			unit_price: input.unitPrice,
+			stock: input.stock,
+			status: input.status,
+		})
+		.select()
+		.single();
+
+	if (error) throw error;
+	return rowToProduct(data);
+}
+
+export async function updateProduct(id: string, input: UpdateProductInput): Promise<Product> {
+	const updateData: Record<string, unknown> = {};
+	if (input.sku !== undefined) updateData.sku = input.sku;
+	if (input.name !== undefined) updateData.name = input.name;
+	if (input.category !== undefined) updateData.category = input.category;
+	if (input.unitPrice !== undefined) updateData.unit_price = input.unitPrice;
+	if (input.stock !== undefined) updateData.stock = input.stock;
+	if (input.status !== undefined) updateData.status = input.status;
+
+	const { data, error } = await supabase
+		.from("products")
+		.update(updateData)
+		.eq("id", id)
+		.select()
+		.single();
+
+	if (error) throw error;
+	return rowToProduct(data);
+}
+
+export async function deleteProduct(id: string): Promise<void> {
+	const { error } = await supabase.from("products").delete().eq("id", id);
+	if (error) throw error;
 }
 
 export async function fetchProducts(params: FetchProductsParams): Promise<FetchProductsResult> {
