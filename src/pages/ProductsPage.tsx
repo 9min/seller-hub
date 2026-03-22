@@ -7,6 +7,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/Button";
 import { PRODUCT_CATEGORIES } from "@/constants/productCategories";
 import { PRODUCT_STATUS_LABEL } from "@/constants/productStatus";
+import { usePermission } from "@/hooks/usePermission";
 import { useCreateProduct, useDeleteProduct, useUpdateProduct } from "@/hooks/useProductMutations";
 import { useProductsData } from "@/hooks/useProductsData";
 import type { FetchProductsParams, ProductSortableColumn } from "@/services/productService";
@@ -52,6 +53,11 @@ export function ProductsPage() {
 
 	const [isFormOpen, setIsFormOpen] = useState(false);
 	const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+
+	const canCreate = usePermission("products", "create");
+	const canUpdate = usePermission("products", "update");
+	const canDelete = usePermission("products", "delete");
+	const canExport = usePermission("products", "export");
 
 	const createMutation = useCreateProduct();
 	const updateMutation = useUpdateProduct();
@@ -158,27 +164,31 @@ export function ProductsPage() {
 					onReset={handleReset}
 				/>
 				<div className="flex items-center gap-2">
-					<Button
-						variant="secondary"
-						size="sm"
-						onClick={() =>
-							exportToCSV(products, `products_${new Date().toISOString().split("T")[0]}`, [
-								{ key: "sku", header: "SKU" },
-								{ key: "name", header: "상품명" },
-								{ key: "category", header: "카테고리" },
-								{ key: "unitPrice", header: "단가" },
-								{ key: "stock", header: "재고" },
-								{ key: "salesCount", header: "판매량" },
-								{ key: "status", header: "상태" },
-							])
-						}
-						disabled={products.length === 0}
-					>
-						CSV 다운로드
-					</Button>
-					<Button size="sm" onClick={() => setIsFormOpen(true)}>
-						상품 등록
-					</Button>
+					{canExport && (
+						<Button
+							variant="secondary"
+							size="sm"
+							onClick={() =>
+								exportToCSV(products, `products_${new Date().toISOString().split("T")[0]}`, [
+									{ key: "sku", header: "SKU" },
+									{ key: "name", header: "상품명" },
+									{ key: "category", header: "카테고리" },
+									{ key: "unitPrice", header: "단가" },
+									{ key: "stock", header: "재고" },
+									{ key: "salesCount", header: "판매량" },
+									{ key: "status", header: "상태" },
+								])
+							}
+							disabled={products.length === 0}
+						>
+							CSV 다운로드
+						</Button>
+					)}
+					{canCreate && (
+						<Button size="sm" onClick={() => setIsFormOpen(true)}>
+							상품 등록
+						</Button>
+					)}
 				</div>
 			</div>
 			<ProductsTable
@@ -194,8 +204,8 @@ export function ProductsPage() {
 				onSortChange={handleSortChange}
 				isLoading={isLoading}
 				isFetching={isFetching}
-				onEdit={handleEdit}
-				onDelete={handleDelete}
+				onEdit={canUpdate ? handleEdit : undefined}
+				onDelete={canDelete ? handleDelete : undefined}
 			/>
 			<ProductFormModal
 				isOpen={isFormOpen}

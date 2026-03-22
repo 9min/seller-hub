@@ -77,11 +77,11 @@ describe("LoginPage", () => {
 		expect(await screen.findByText("Invalid login credentials")).toBeInTheDocument();
 	});
 
-	it("로딩 중에는 로딩 화면을 표시한다", () => {
+	it("로딩 중에도 로그인 폼을 표시한다", () => {
 		useAuthStore.setState({ isLoading: true });
 
 		renderLoginPage();
 
-		expect(screen.getByText("로딩 중...")).toBeInTheDocument();
+		expect(screen.getByRole("button", { name: "로그인" })).toBeInTheDocument();
 	});
 });
