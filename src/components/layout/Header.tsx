@@ -20,7 +20,7 @@ export function Header({ title }: HeaderProps) {
 					{initial}
 				</div>
 				<span className="text-sm text-gray-600">{email || "셀러 관리자"}</span>
-				<Button variant="ghost" size="sm" onClick={() => signOut()}>
+				<Button variant="ghost" size="sm" onClick={() => signOut().catch(console.error)}>
 					로그아웃
 				</Button>
 			</div>
