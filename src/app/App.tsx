@@ -4,6 +4,7 @@ import { Route, Routes } from "react-router-dom";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { ErrorBoundary } from "@/components/error/ErrorBoundary";
 import { ToastContainer } from "@/components/ui/ToastContainer";
+import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
 import { useAuthStore } from "@/stores/authStore";
 
 const LoginPage = lazy(() => import("@/pages/LoginPage").then((m) => ({ default: m.LoginPage })));
@@ -38,6 +39,8 @@ export function App() {
 		const cleanup = initialize();
 		return cleanup;
 	}, [initialize]);
+
+	useRealtimeSubscription();
 
 	return (
 		<ErrorBoundary>
