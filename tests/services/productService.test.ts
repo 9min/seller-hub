@@ -53,6 +53,9 @@ const MOCK_DB_ROW = {
 	status: "ACTIVE",
 	created_at: "2026-01-01T00:00:00.000Z",
 	updated_at: "2026-03-01T00:00:00.000Z",
+	created_by: null,
+	updated_by: null,
+	deleted_at: null,
 };
 
 describe("fetchProducts", () => {

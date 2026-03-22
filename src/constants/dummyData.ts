@@ -117,6 +117,7 @@ export function generateOrders(count: number): Order[] {
 			id: `order-${i + 1}`,
 			orderNumber: `ORD-${dateStr}-${seq}`,
 			buyerName,
+			productId: null,
 			productName,
 			category,
 			quantity,

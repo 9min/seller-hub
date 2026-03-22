@@ -13,6 +13,9 @@ export type Database = {
 					role: string;
 					created_at: string;
 					updated_at: string;
+					created_by: string | null;
+					updated_by: string | null;
+					deleted_at: string | null;
 				};
 				Insert: {
 					id: string;
@@ -21,6 +24,9 @@ export type Database = {
 					role?: string;
 					created_at?: string;
 					updated_at?: string;
+					created_by?: string | null;
+					updated_by?: string | null;
+					deleted_at?: string | null;
 				};
 				Update: Partial<Database["public"]["Tables"]["sellers"]["Insert"]>;
 				Relationships: [];
@@ -38,6 +44,9 @@ export type Database = {
 					seller_id: string | null;
 					created_at: string;
 					updated_at: string;
+					created_by: string | null;
+					updated_by: string | null;
+					deleted_at: string | null;
 				};
 				Insert: {
 					id?: string;
@@ -51,6 +60,9 @@ export type Database = {
 					seller_id?: string;
 					created_at?: string;
 					updated_at?: string;
+					created_by?: string | null;
+					updated_by?: string | null;
+					deleted_at?: string | null;
 				};
 				Update: Partial<Database["public"]["Tables"]["products"]["Insert"]>;
 				Relationships: [];
@@ -60,8 +72,7 @@ export type Database = {
 					id: string;
 					order_number: string;
 					buyer_name: string;
-					product_name: string;
-					category: string;
+					product_id: string | null;
 					quantity: number;
 					unit_price: number;
 					total_price: number;
@@ -73,13 +84,15 @@ export type Database = {
 					seller_id: string | null;
 					created_at: string;
 					updated_at: string;
+					created_by: string | null;
+					updated_by: string | null;
+					deleted_at: string | null;
 				};
 				Insert: {
 					id?: string;
 					order_number: string;
 					buyer_name: string;
-					product_name: string;
-					category: string;
+					product_id?: string | null;
 					quantity: number;
 					unit_price: number;
 					total_price: number;
@@ -91,9 +104,20 @@ export type Database = {
 					seller_id?: string;
 					created_at?: string;
 					updated_at?: string;
+					created_by?: string | null;
+					updated_by?: string | null;
+					deleted_at?: string | null;
 				};
 				Update: Partial<Database["public"]["Tables"]["orders"]["Insert"]>;
-				Relationships: [];
+				Relationships: [
+					{
+						foreignKeyName: "orders_product_id_fkey";
+						columns: ["product_id"];
+						isOneToOne: false;
+						referencedRelation: "products";
+						referencedColumns: ["id"];
+					},
+				];
 			};
 		};
 		Functions: {

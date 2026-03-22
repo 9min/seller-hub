@@ -8,6 +8,11 @@ import { formatCount, formatCurrency, formatPercent } from "@/utils/formatNumber
 
 type OrderRow = Database["public"]["Tables"]["orders"]["Row"];
 
+/** Supabase JOIN 응답 형태: orders + products(name, category) */
+type OrderRowWithProduct = OrderRow & {
+	products: { name: string; category: string } | null;
+};
+
 export type SortableColumn = "orderedAt" | "totalPrice" | "quantity";
 
 const SORT_COLUMN_MAP: Record<SortableColumn, string> = {
@@ -32,14 +37,18 @@ export interface FetchOrdersResult {
 	total: number;
 }
 
+/** products JOIN 결과를 포함한 쿼리용 select 문자열 */
+const ORDER_SELECT = "*, products(name, category)" as const;
+
 // DB 행(snake_case) → Order 도메인 타입(camelCase) 변환
-function rowToOrder(row: OrderRow): Order {
+function rowToOrder(row: OrderRowWithProduct): Order {
 	return {
 		id: row.id,
 		orderNumber: row.order_number,
 		buyerName: row.buyer_name,
-		productName: row.product_name,
-		category: row.category,
+		productId: row.product_id,
+		productName: row.products?.name ?? "",
+		category: row.products?.category ?? "",
 		quantity: row.quantity,
 		unitPrice: row.unit_price,
 		totalPrice: row.total_price,
@@ -52,10 +61,10 @@ function rowToOrder(row: OrderRow): Order {
 }
 
 export async function fetchOrderById(id: string): Promise<Order> {
-	const { data, error } = await supabase.from("orders").select("*").eq("id", id).single();
+	const { data, error } = await supabase.from("orders").select(ORDER_SELECT).eq("id", id).single();
 
 	if (error) throw error;
-	return rowToOrder(data);
+	return rowToOrder(data as OrderRowWithProduct);
 }
 
 export async function updateOrderStatus(id: string, newStatus: OrderStatus): Promise<Order> {
@@ -63,11 +72,11 @@ export async function updateOrderStatus(id: string, newStatus: OrderStatus): Pro
 		.from("orders")
 		.update({ status: newStatus })
 		.eq("id", id)
-		.select()
+		.select(ORDER_SELECT)
 		.single();
 
 	if (error) throw error;
-	return rowToOrder(data);
+	return rowToOrder(data as OrderRowWithProduct);
 }
 
 export async function fetchOrders(params: FetchOrdersParams): Promise<FetchOrdersResult> {
@@ -78,7 +87,7 @@ export async function fetchOrders(params: FetchOrdersParams): Promise<FetchOrder
 
 	let query = supabase
 		.from("orders")
-		.select("*", { count: "exact" })
+		.select(ORDER_SELECT, { count: "exact" })
 		.order(sortColumn, { ascending })
 		.range(page * pageSize, (page + 1) * pageSize - 1);
 
@@ -86,9 +95,7 @@ export async function fetchOrders(params: FetchOrdersParams): Promise<FetchOrder
 		// PostgREST 메타문자 이스케이프 (쉼표, 마침표, 괄호 등)
 		const q = searchQuery.trim().replace(/[,%.()"\\]/g, "");
 		if (q) {
-			query = query.or(
-				`order_number.ilike.%${q}%,buyer_name.ilike.%${q}%,product_name.ilike.%${q}%`,
-			);
+			query = query.or(`order_number.ilike.%${q}%,buyer_name.ilike.%${q}%`);
 		}
 	}
 
@@ -114,7 +121,7 @@ export async function fetchOrders(params: FetchOrdersParams): Promise<FetchOrder
 	}
 
 	return {
-		orders: (data ?? []).map(rowToOrder),
+		orders: (data ?? []).map((row) => rowToOrder(row as OrderRowWithProduct)),
 		total: count ?? 0,
 	};
 }

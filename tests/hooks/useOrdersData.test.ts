@@ -11,6 +11,7 @@ const MOCK_ORDERS = [
 		id: "order-1",
 		orderNumber: "ORD-20260316-00001",
 		buyerName: "김민준",
+		productId: "product-1",
 		productName: "무선 이어버드",
 		category: "전자기기",
 		quantity: 2,

@@ -11,6 +11,7 @@ export interface Order {
 	id: string;
 	orderNumber: string;
 	buyerName: string;
+	productId: string | null;
 	productName: string;
 	category: string;
 	quantity: number;
