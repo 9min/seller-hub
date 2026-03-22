@@ -185,7 +185,7 @@ export const OrdersTable = memo(function OrdersTable({
 				</div>
 				<input
 					type="search"
-					placeholder="주문번호, 구매자명, 상품명 검색"
+					placeholder="주문번호, 구매자명 검색"
 					aria-label="주문 검색"
 					value={localSearch}
 					onChange={(e) => setLocalSearch(e.target.value)}
