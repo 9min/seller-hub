@@ -167,7 +167,7 @@ export function OrdersPage() {
 
 	return (
 		<AppLayout title="주문 관리">
-			<div className="flex items-center justify-between mb-4">
+			<div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
 				<OrdersFilterBar
 					statuses={params.statuses ?? []}
 					startDate={params.startDate ?? ""}

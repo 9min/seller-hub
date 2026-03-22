@@ -188,7 +188,7 @@ export const ProductsTable = memo(function ProductsTable({
 	return (
 		<Card className="overflow-hidden p-0">
 			{/* 툴바 */}
-			<div className="flex items-center justify-between border-b border-gray-200 px-4 py-3">
+			<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-200 px-4 py-3">
 				<div className="flex items-center gap-2">
 					<h2 className="text-sm font-semibold text-gray-700">상품 목록</h2>
 					<span className="tabular-nums text-xs text-gray-400">{formatCount(total)}건</span>
@@ -196,9 +196,10 @@ export const ProductsTable = memo(function ProductsTable({
 				<input
 					type="search"
 					placeholder="상품명, SKU 검색"
+					aria-label="상품 검색"
 					value={localSearch}
 					onChange={(e) => setLocalSearch(e.target.value)}
-					className="w-56 rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-violet-500"
+					className="w-full sm:w-56 rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-violet-500"
 				/>
 			</div>
 
@@ -210,6 +211,7 @@ export const ProductsTable = memo(function ProductsTable({
 					</div>
 				) : (
 					<table className="w-full border-collapse text-sm">
+						<caption className="sr-only">상품 목록 테이블</caption>
 						<thead className="sticky top-0 z-10 border-b border-gray-200 bg-gray-50">
 							{table.getHeaderGroups().map((headerGroup) => (
 								<tr key={headerGroup.id}>
@@ -218,6 +220,7 @@ export const ProductsTable = memo(function ProductsTable({
 										return (
 											<th
 												key={header.id}
+												scope="col"
 												style={{ width: header.getSize() }}
 												className="whitespace-nowrap px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-gray-500"
 											>

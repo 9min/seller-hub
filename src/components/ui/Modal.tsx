@@ -32,8 +32,8 @@ export function Modal({ isOpen, onClose, title, children, className }: ModalProp
 			ref={dialogRef}
 			onClose={onClose}
 			className={cn(
-				"p-0 rounded-xl shadow-lg border border-gray-200 backdrop:bg-black/40",
-				"max-w-lg w-full",
+				"p-0 m-auto rounded-xl shadow-lg border border-gray-200 backdrop:bg-black/40",
+				"max-w-lg w-[calc(100%-2rem)]",
 				className,
 			)}
 		>

@@ -178,7 +178,7 @@ export const OrdersTable = memo(function OrdersTable({
 	return (
 		<Card className="p-0 overflow-hidden">
 			{/* 툴바 */}
-			<div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
+			<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-4 py-3 border-b border-gray-200">
 				<div className="flex items-center gap-2">
 					<h2 className="text-sm font-semibold text-gray-700">주문 목록</h2>
 					<span className="text-xs text-gray-400 tabular-nums">{formatCount(total)}건</span>
@@ -186,9 +186,10 @@ export const OrdersTable = memo(function OrdersTable({
 				<input
 					type="search"
 					placeholder="주문번호, 구매자명, 상품명 검색"
+					aria-label="주문 검색"
 					value={localSearch}
 					onChange={(e) => setLocalSearch(e.target.value)}
-					className="w-64 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+					className="w-full sm:w-64 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
 				/>
 			</div>
 
@@ -200,6 +201,7 @@ export const OrdersTable = memo(function OrdersTable({
 					</div>
 				) : (
 					<table className="w-full text-sm border-collapse">
+						<caption className="sr-only">주문 목록 테이블</caption>
 						<thead className="sticky top-0 z-10 bg-gray-50 border-b border-gray-200">
 							{table.getHeaderGroups().map((headerGroup) => (
 								<tr key={headerGroup.id}>
@@ -208,6 +210,7 @@ export const OrdersTable = memo(function OrdersTable({
 										return (
 											<th
 												key={header.id}
+												scope="col"
 												style={{ width: header.getSize() }}
 												className="px-3 py-2.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wide whitespace-nowrap"
 											>
