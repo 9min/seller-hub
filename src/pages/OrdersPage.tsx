@@ -6,6 +6,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/Button";
 import { ORDER_STATUS_LABEL } from "@/constants/orderStatus";
 import { useOrdersData } from "@/hooks/useOrdersData";
+import { usePermission } from "@/hooks/usePermission";
 import type { FetchOrdersParams, SortableColumn } from "@/services/orderService";
 import type { OrderStatus } from "@/types/order";
 import { exportToCSV } from "@/utils/csvExport";
@@ -58,6 +59,7 @@ export function OrdersPage() {
 	const [searchParams, setSearchParams] = useSearchParams();
 	const params = parseOrdersSearchParams(searchParams);
 	const { orders, total, isLoading, isFetching } = useOrdersData(params);
+	const canExport = usePermission("orders", "export");
 
 	function setParam(key: string, value: string) {
 		setSearchParams((prev) => {
@@ -177,14 +179,16 @@ export function OrdersPage() {
 					onEndDateChange={handleEndDateChange}
 					onReset={handleReset}
 				/>
-				<Button
-					variant="secondary"
-					size="sm"
-					onClick={handleExportCSV}
-					disabled={orders.length === 0}
-				>
-					CSV 다운로드
-				</Button>
+				{canExport && (
+					<Button
+						variant="secondary"
+						size="sm"
+						onClick={handleExportCSV}
+						disabled={orders.length === 0}
+					>
+						CSV 다운로드
+					</Button>
+				)}
 			</div>
 			<OrdersTable
 				orders={orders}

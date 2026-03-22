@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/Input";
 import { useAuthStore } from "@/stores/authStore";
 
 export function LoginPage() {
-	const { isAuthenticated, isLoading } = useAuthStore();
+	const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 	const signIn = useAuthStore((s) => s.signIn);
 	const signUp = useAuthStore((s) => s.signUp);
 
@@ -18,14 +18,7 @@ export function LoginPage() {
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [isSignUpMode, setIsSignUpMode] = useState(false);
 
-	if (isLoading) {
-		return (
-			<div className="flex items-center justify-center min-h-screen bg-gray-50">
-				<div className="text-gray-500">로딩 중...</div>
-			</div>
-		);
-	}
-
+	// 이미 인증되었으면 대시보드로 리다이렉트
 	if (isAuthenticated) {
 		return <Navigate to="/" replace />;
 	}
@@ -48,6 +41,8 @@ export function LoginPage() {
 				setIsSignUpMode(false);
 			} else {
 				await signIn(email, password);
+				// onAuthStateChange가 isAuthenticated를 true로 설정하면
+				// 다음 렌더에서 <Navigate to="/" /> 가 자동 실행됨
 			}
 		} catch (err) {
 			const message = err instanceof Error ? err.message : "요청에 실패했습니다.";

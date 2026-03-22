@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { ORDER_STATUS_LABEL } from "@/constants/orderStatus";
+import { usePermission } from "@/hooks/usePermission";
 import { useUpdateOrderStatus } from "@/hooks/useUpdateOrderStatus";
 import type { Order, OrderStatus } from "@/types/order";
 import { formatDateTime } from "@/utils/formatDate";
@@ -27,6 +28,7 @@ const ALL_STATUSES: OrderStatus[] = [
 export function OrderDetailView({ order }: OrderDetailViewProps) {
 	const [selectedStatus, setSelectedStatus] = useState<OrderStatus>(order.status);
 	const mutation = useUpdateOrderStatus();
+	const canUpdate = usePermission("orders", "update");
 
 	const handleStatusChange = () => {
 		if (selectedStatus !== order.status) {
@@ -120,29 +122,31 @@ export function OrderDetailView({ order }: OrderDetailViewProps) {
 				</dl>
 			</Card>
 
-			<Card className="p-6">
-				<h3 className="mb-4 text-sm font-semibold text-gray-900">상태 변경</h3>
-				<div className="flex items-center gap-3">
-					<select
-						value={selectedStatus}
-						onChange={(e) => setSelectedStatus(e.target.value as OrderStatus)}
-						className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-					>
-						{ALL_STATUSES.map((s) => (
-							<option key={s} value={s}>
-								{ORDER_STATUS_LABEL[s]}
-							</option>
-						))}
-					</select>
-					<Button
-						size="sm"
-						disabled={selectedStatus === order.status || mutation.isPending}
-						onClick={handleStatusChange}
-					>
-						{mutation.isPending ? "변경 중..." : "상태 변경"}
-					</Button>
-				</div>
-			</Card>
+			{canUpdate && (
+				<Card className="p-6">
+					<h3 className="mb-4 text-sm font-semibold text-gray-900">상태 변경</h3>
+					<div className="flex items-center gap-3">
+						<select
+							value={selectedStatus}
+							onChange={(e) => setSelectedStatus(e.target.value as OrderStatus)}
+							className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+						>
+							{ALL_STATUSES.map((s) => (
+								<option key={s} value={s}>
+									{ORDER_STATUS_LABEL[s]}
+								</option>
+							))}
+						</select>
+						<Button
+							size="sm"
+							disabled={selectedStatus === order.status || mutation.isPending}
+							onClick={handleStatusChange}
+						>
+							{mutation.isPending ? "변경 중..." : "상태 변경"}
+						</Button>
+					</div>
+				</Card>
+			)}
 		</div>
 	);
 }

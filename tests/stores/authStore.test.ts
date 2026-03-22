@@ -8,6 +8,15 @@ const mockSignOut = vi.fn();
 const mockOnAuthStateChange = vi.fn();
 const mockQueryClientClear = vi.fn();
 
+const mockFrom = vi.fn(() => ({
+	select: vi.fn(() => ({
+		eq: vi.fn(() => ({
+			single: vi.fn(() => Promise.resolve({ data: { role: "seller" }, error: null })),
+		})),
+	})),
+	upsert: vi.fn(() => Promise.resolve({ data: null, error: null })),
+}));
+
 vi.mock("@/lib/supabase", () => ({
 	supabase: {
 		auth: {
@@ -17,6 +26,7 @@ vi.mock("@/lib/supabase", () => ({
 			signOut: (...args: unknown[]) => mockSignOut(...args),
 			onAuthStateChange: (...args: unknown[]) => mockOnAuthStateChange(...args),
 		},
+		from: (...args: unknown[]) => mockFrom(...args),
 	},
 }));
 
@@ -56,6 +66,7 @@ describe("authStore", () => {
 			session: null,
 			isLoading: true,
 			isAuthenticated: false,
+			role: "seller",
 		});
 	});
 
@@ -65,6 +76,7 @@ describe("authStore", () => {
 			session: null,
 			isLoading: true,
 			isAuthenticated: false,
+			role: "seller",
 		});
 	});
 

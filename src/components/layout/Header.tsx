@@ -1,13 +1,17 @@
 import { Button } from "@/components/ui/Button";
 import { useAuthStore } from "@/stores/authStore";
+import { useToastStore } from "@/stores/toastStore";
 import { useUiStore } from "@/stores/uiStore";
 
 interface HeaderProps {
 	title: string;
 }
 
+const ROLE_LABEL = { admin: "관리자", seller: "셀러", viewer: "뷰어" } as const;
+
 export function Header({ title }: HeaderProps) {
 	const user = useAuthStore((s) => s.user);
+	const role = useAuthStore((s) => s.role);
 	const signOut = useAuthStore((s) => s.signOut);
 	const toggleSidebar = useUiStore((s) => s.toggleSidebar);
 
@@ -27,7 +31,22 @@ export function Header({ title }: HeaderProps) {
 					{initial}
 				</div>
 				<span className="hidden sm:inline text-sm text-gray-600">{email || "셀러 관리자"}</span>
-				<Button variant="ghost" size="sm" onClick={() => signOut().catch(console.error)}>
+				<span className="hidden sm:inline px-2 py-0.5 text-xs font-medium rounded-full bg-gray-100 text-gray-600">
+					{ROLE_LABEL[role]}
+				</span>
+				<Button
+					variant="ghost"
+					size="sm"
+					onClick={() =>
+						signOut().catch(() => {
+							useToastStore.getState().addToast({
+								message: "로그아웃에 실패했습니다. 다시 시도해주세요.",
+								type: "error",
+								duration: 5000,
+							});
+						})
+					}
+				>
 					로그아웃
 				</Button>
 			</div>
