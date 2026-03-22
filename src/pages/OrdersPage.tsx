@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import { OrdersFilterBar } from "@/components/feature/orders/OrdersFilterBar";
 import { OrdersTable } from "@/components/feature/orders/OrdersTable";
@@ -72,18 +73,21 @@ export function OrdersPage() {
 		setParam("page", page === 0 ? "" : String(page));
 	}
 
-	function handleSearchChange(q: string) {
-		setSearchParams((prev) => {
-			const next = new URLSearchParams(prev);
-			if (q) {
-				next.set("q", q);
-			} else {
-				next.delete("q");
-			}
-			next.delete("page"); // 검색 시 첫 페이지로 이동
-			return next;
-		});
-	}
+	const handleSearchChange = useCallback(
+		(q: string) => {
+			setSearchParams((prev) => {
+				const next = new URLSearchParams(prev);
+				if (q) {
+					next.set("q", q);
+				} else {
+					next.delete("q");
+				}
+				next.delete("page"); // 검색 시 첫 페이지로 이동
+				return next;
+			});
+		},
+		[setSearchParams],
+	);
 
 	function handleStatusesChange(statuses: OrderStatus[]) {
 		setSearchParams((prev) => {

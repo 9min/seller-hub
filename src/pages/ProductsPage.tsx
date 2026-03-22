@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import { ProductsFilterBar } from "@/components/feature/products/ProductsFilterBar";
 import { ProductsTable } from "@/components/feature/products/ProductsTable";
@@ -54,15 +55,18 @@ export function ProductsPage() {
 		});
 	}
 
-	function handleSearchChange(q: string) {
-		setSearchParams((prev) => {
-			const next = new URLSearchParams(prev);
-			if (q) next.set("q", q);
-			else next.delete("q");
-			next.delete("page");
-			return next;
-		});
-	}
+	const handleSearchChange = useCallback(
+		(q: string) => {
+			setSearchParams((prev) => {
+				const next = new URLSearchParams(prev);
+				if (q) next.set("q", q);
+				else next.delete("q");
+				next.delete("page");
+				return next;
+			});
+		},
+		[setSearchParams],
+	);
 
 	function handlePageChange(page: number) {
 		setParam("page", page === 0 ? "" : String(page));
