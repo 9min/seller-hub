@@ -10,6 +10,8 @@
 		"lint": "biome check --write .",
 		"test": "vitest",
 		"test:coverage": "vitest run --coverage",
+		"e2e": "playwright test",
+		"e2e:ui": "playwright test --ui",
 		"db:start": "pnpm supabase start",
 		"db:stop": "pnpm supabase stop",
 		"db:reset": "pnpm supabase db reset",
