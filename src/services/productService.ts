@@ -87,7 +87,10 @@ export async function updateProduct(id: string, input: UpdateProductInput): Prom
 }
 
 export async function deleteProduct(id: string): Promise<void> {
-	const { error } = await supabase.from("products").delete().eq("id", id);
+	const { error } = await supabase
+		.from("products")
+		.update({ deleted_at: new Date().toISOString() })
+		.eq("id", id);
 	if (error) throw error;
 }
 

@@ -63,8 +63,8 @@ const MOCK_ORDER_ROWS = [
 		id: "order-1",
 		order_number: "ORD-20260316-00001",
 		buyer_name: "김민준",
-		product_name: "무선 이어버드",
-		category: "전자기기",
+		product_id: "product-1",
+		products: { name: "무선 이어버드", category: "전자기기" },
 		quantity: 2,
 		unit_price: 50000,
 		total_price: 100000,
@@ -75,13 +75,17 @@ const MOCK_ORDER_ROWS = [
 		is_delayed: false,
 		created_at: "2026-03-10T00:00:00.000Z",
 		updated_at: "2026-03-10T00:00:00.000Z",
+		created_by: null,
+		updated_by: null,
+		deleted_at: null,
+		seller_id: null,
 	},
 	{
 		id: "order-2",
 		order_number: "ORD-20260315-00002",
 		buyer_name: "이서연",
-		product_name: "수분 크림",
-		category: "뷰티",
+		product_id: "product-2",
+		products: { name: "수분 크림", category: "뷰티" },
 		quantity: 1,
 		unit_price: 30000,
 		total_price: 30000,
@@ -92,6 +96,10 @@ const MOCK_ORDER_ROWS = [
 		is_delayed: true,
 		created_at: "2026-03-09T00:00:00.000Z",
 		updated_at: "2026-03-09T00:00:00.000Z",
+		created_by: null,
+		updated_by: null,
+		deleted_at: null,
+		seller_id: null,
 	},
 ];
 
@@ -155,7 +163,9 @@ describe("fetchOrders", () => {
 		expect(order).toBeDefined();
 		expect(order?.orderNumber).toBe("ORD-20260316-00001");
 		expect(order?.buyerName).toBe("김민준");
+		expect(order?.productId).toBe("product-1");
 		expect(order?.productName).toBe("무선 이어버드");
+		expect(order?.category).toBe("전자기기");
 		expect(order?.isDelayed).toBe(false);
 	});
 
