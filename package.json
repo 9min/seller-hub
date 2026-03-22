@@ -22,6 +22,7 @@
 		"seed:products": "tsx --env-file .env.local scripts/seedProducts.ts"
 	},
 	"dependencies": {
+		"@sentry/react": "^10.45.0",
 		"@supabase/supabase-js": "^2.99.1",
 		"@tanstack/react-query": "^5.90.21",
 		"@tanstack/react-table": "^8.21.3",

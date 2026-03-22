@@ -4,7 +4,10 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 
 import { queryClient } from "@/lib/queryClient";
+import { initSentry } from "@/lib/sentry";
 import { App } from "./App";
+
+initSentry();
 import "./index.css";
 
 const rootElement = document.getElementById("root");

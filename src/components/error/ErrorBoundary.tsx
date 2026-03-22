@@ -1,6 +1,7 @@
 import type { ErrorInfo, ReactNode } from "react";
 import { Component } from "react";
 
+import { Sentry } from "@/lib/sentry";
 import { ErrorFallback } from "./ErrorFallback";
 
 interface ErrorBoundaryProps {
@@ -29,6 +30,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
 	componentDidCatch(error: Error, errorInfo: ErrorInfo) {
 		console.error("[ErrorBoundary] 에러 발생:", error, errorInfo);
+		Sentry.captureException(error, { extra: { componentStack: errorInfo.componentStack } });
 	}
 
 	resetErrorBoundary = () => {
