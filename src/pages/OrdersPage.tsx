@@ -3,10 +3,12 @@ import { useSearchParams } from "react-router-dom";
 import { OrdersFilterBar } from "@/components/feature/orders/OrdersFilterBar";
 import { OrdersTable } from "@/components/feature/orders/OrdersTable";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { Button } from "@/components/ui/Button";
 import { ORDER_STATUS_LABEL } from "@/constants/orderStatus";
 import { useOrdersData } from "@/hooks/useOrdersData";
 import type { FetchOrdersParams, SortableColumn } from "@/services/orderService";
 import type { OrderStatus } from "@/types/order";
+import { exportToCSV } from "@/utils/csvExport";
 
 const PAGE_SIZE = 100;
 
@@ -149,17 +151,41 @@ export function OrdersPage() {
 		});
 	}
 
+	function handleExportCSV() {
+		exportToCSV(orders, `orders_${new Date().toISOString().split("T")[0]}`, [
+			{ key: "orderNumber", header: "주문번호" },
+			{ key: "orderedAt", header: "주문일시" },
+			{ key: "buyerName", header: "구매자" },
+			{ key: "productName", header: "상품명" },
+			{ key: "category", header: "카테고리" },
+			{ key: "quantity", header: "수량" },
+			{ key: "unitPrice", header: "단가" },
+			{ key: "totalPrice", header: "총액" },
+			{ key: "status", header: "상태" },
+		]);
+	}
+
 	return (
 		<AppLayout title="주문 관리">
-			<OrdersFilterBar
-				statuses={params.statuses ?? []}
-				startDate={params.startDate ?? ""}
-				endDate={params.endDate ?? ""}
-				onStatusesChange={handleStatusesChange}
-				onStartDateChange={handleStartDateChange}
-				onEndDateChange={handleEndDateChange}
-				onReset={handleReset}
-			/>
+			<div className="flex items-center justify-between mb-4">
+				<OrdersFilterBar
+					statuses={params.statuses ?? []}
+					startDate={params.startDate ?? ""}
+					endDate={params.endDate ?? ""}
+					onStatusesChange={handleStatusesChange}
+					onStartDateChange={handleStartDateChange}
+					onEndDateChange={handleEndDateChange}
+					onReset={handleReset}
+				/>
+				<Button
+					variant="secondary"
+					size="sm"
+					onClick={handleExportCSV}
+					disabled={orders.length === 0}
+				>
+					CSV 다운로드
+				</Button>
+			</div>
 			<OrdersTable
 				orders={orders}
 				total={total}

@@ -1,13 +1,17 @@
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { ProductFormModal } from "@/components/feature/products/ProductFormModal";
 import { ProductsFilterBar } from "@/components/feature/products/ProductsFilterBar";
 import { ProductsTable } from "@/components/feature/products/ProductsTable";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { Button } from "@/components/ui/Button";
 import { PRODUCT_CATEGORIES } from "@/constants/productCategories";
 import { PRODUCT_STATUS_LABEL } from "@/constants/productStatus";
+import { useCreateProduct, useDeleteProduct, useUpdateProduct } from "@/hooks/useProductMutations";
 import { useProductsData } from "@/hooks/useProductsData";
 import type { FetchProductsParams, ProductSortableColumn } from "@/services/productService";
-import type { ProductStatus } from "@/types/product";
+import type { CreateProductInput, Product, ProductStatus } from "@/types/product";
+import { exportToCSV } from "@/utils/csvExport";
 
 const PAGE_SIZE = 50;
 
@@ -45,6 +49,13 @@ export function ProductsPage() {
 	const [searchParams, setSearchParams] = useSearchParams();
 	const params = parseProductsSearchParams(searchParams);
 	const { products, total, isLoading, isFetching } = useProductsData(params);
+
+	const [isFormOpen, setIsFormOpen] = useState(false);
+	const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+
+	const createMutation = useCreateProduct();
+	const updateMutation = useUpdateProduct();
+	const deleteMutation = useDeleteProduct();
 
 	function setParam(key: string, value: string) {
 		setSearchParams((prev) => {
@@ -112,15 +123,64 @@ export function ProductsPage() {
 		});
 	}
 
+	function handleFormSubmit(data: CreateProductInput) {
+		if (editingProduct) {
+			updateMutation.mutate({ id: editingProduct.id, data }, { onSuccess: () => closeForm() });
+		} else {
+			createMutation.mutate(data, { onSuccess: () => closeForm() });
+		}
+	}
+
+	function handleEdit(product: Product) {
+		setEditingProduct(product);
+		setIsFormOpen(true);
+	}
+
+	function handleDelete(product: Product) {
+		if (window.confirm(`"${product.name}" 상품을 삭제하시겠습니까?`)) {
+			deleteMutation.mutate(product.id);
+		}
+	}
+
+	function closeForm() {
+		setIsFormOpen(false);
+		setEditingProduct(null);
+	}
+
 	return (
 		<AppLayout title="상품 관리">
-			<ProductsFilterBar
-				categories={params.categories ?? []}
-				statuses={params.statuses ?? []}
-				onCategoriesChange={handleCategoriesChange}
-				onStatusesChange={handleStatusesChange}
-				onReset={handleReset}
-			/>
+			<div className="flex items-center justify-between mb-4">
+				<ProductsFilterBar
+					categories={params.categories ?? []}
+					statuses={params.statuses ?? []}
+					onCategoriesChange={handleCategoriesChange}
+					onStatusesChange={handleStatusesChange}
+					onReset={handleReset}
+				/>
+				<div className="flex items-center gap-2">
+					<Button
+						variant="secondary"
+						size="sm"
+						onClick={() =>
+							exportToCSV(products, `products_${new Date().toISOString().split("T")[0]}`, [
+								{ key: "sku", header: "SKU" },
+								{ key: "name", header: "상품명" },
+								{ key: "category", header: "카테고리" },
+								{ key: "unitPrice", header: "단가" },
+								{ key: "stock", header: "재고" },
+								{ key: "salesCount", header: "판매량" },
+								{ key: "status", header: "상태" },
+							])
+						}
+						disabled={products.length === 0}
+					>
+						CSV 다운로드
+					</Button>
+					<Button size="sm" onClick={() => setIsFormOpen(true)}>
+						상품 등록
+					</Button>
+				</div>
+			</div>
 			<ProductsTable
 				products={products}
 				total={total}
@@ -134,6 +194,15 @@ export function ProductsPage() {
 				onSortChange={handleSortChange}
 				isLoading={isLoading}
 				isFetching={isFetching}
+				onEdit={handleEdit}
+				onDelete={handleDelete}
+			/>
+			<ProductFormModal
+				isOpen={isFormOpen}
+				onClose={closeForm}
+				onSubmit={handleFormSubmit}
+				product={editingProduct}
+				isPending={createMutation.isPending || updateMutation.isPending}
 			/>
 		</AppLayout>
 	);

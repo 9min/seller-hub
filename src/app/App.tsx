@@ -19,6 +19,9 @@ const ProductsPage = lazy(() =>
 const AnalyticsPage = lazy(() =>
 	import("@/pages/AnalyticsPage").then((m) => ({ default: m.AnalyticsPage })),
 );
+const OrderDetailPage = lazy(() =>
+	import("@/pages/OrderDetailPage").then((m) => ({ default: m.OrderDetailPage })),
+);
 
 function PageLoader() {
 	return (
@@ -45,6 +48,7 @@ export function App() {
 					<Route element={<ProtectedRoute />}>
 						<Route path="/" element={<DashboardPage />} />
 						<Route path="/orders" element={<OrdersPage />} />
+						<Route path="/orders/:id" element={<OrderDetailPage />} />
 						<Route path="/products" element={<ProductsPage />} />
 						<Route path="/analytics" element={<AnalyticsPage />} />
 					</Route>

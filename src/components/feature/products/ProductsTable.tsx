@@ -7,6 +7,7 @@ import {
 } from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { memo, useEffect, useMemo, useRef, useState } from "react";
+import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Pagination } from "@/components/ui/Pagination";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -27,6 +28,8 @@ interface ProductsTableProps {
 	onSortChange?: (sortBy: string, sortOrder: "asc" | "desc") => void;
 	isLoading?: boolean;
 	isFetching?: boolean;
+	onEdit?: (product: Product) => void;
+	onDelete?: (product: Product) => void;
 }
 
 const ROW_HEIGHT = 48;
@@ -58,6 +61,8 @@ export const ProductsTable = memo(function ProductsTable({
 	onSortChange,
 	isLoading,
 	isFetching,
+	onEdit,
+	onDelete,
 }: ProductsTableProps) {
 	const parentRef = useRef<HTMLDivElement>(null);
 
@@ -123,8 +128,32 @@ export const ProductsTable = memo(function ProductsTable({
 				enableSorting: false,
 				cell: ({ getValue }) => <ProductStatusBadge status={getValue<ProductStatus>()} />,
 			},
+			...(onEdit || onDelete
+				? [
+						{
+							id: "actions",
+							header: "작업",
+							size: 100,
+							enableSorting: false,
+							cell: ({ row }: { row: { original: Product } }) => (
+								<div className="flex gap-1">
+									{onEdit && (
+										<Button variant="ghost" size="sm" onClick={() => onEdit(row.original)}>
+											수정
+										</Button>
+									)}
+									{onDelete && (
+										<Button variant="ghost" size="sm" onClick={() => onDelete(row.original)}>
+											삭제
+										</Button>
+									)}
+								</div>
+							),
+						} satisfies ColumnDef<Product>,
+					]
+				: []),
 		],
-		[],
+		[onEdit, onDelete],
 	);
 
 	const table = useReactTable({

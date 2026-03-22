@@ -51,6 +51,25 @@ function rowToOrder(row: OrderRow): Order {
 	};
 }
 
+export async function fetchOrderById(id: string): Promise<Order> {
+	const { data, error } = await supabase.from("orders").select("*").eq("id", id).single();
+
+	if (error) throw error;
+	return rowToOrder(data);
+}
+
+export async function updateOrderStatus(id: string, newStatus: OrderStatus): Promise<Order> {
+	const { data, error } = await supabase
+		.from("orders")
+		.update({ status: newStatus })
+		.eq("id", id)
+		.select()
+		.single();
+
+	if (error) throw error;
+	return rowToOrder(data);
+}
+
 export async function fetchOrders(params: FetchOrdersParams): Promise<FetchOrdersResult> {
 	const { page, pageSize, searchQuery, statuses, startDate, endDate, sortBy, sortOrder } = params;
 
