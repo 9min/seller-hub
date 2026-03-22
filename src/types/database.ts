@@ -5,6 +5,24 @@
 export type Database = {
 	public: {
 		Tables: {
+			sellers: {
+				Row: {
+					id: string;
+					email: string;
+					name: string;
+					created_at: string;
+					updated_at: string;
+				};
+				Insert: {
+					id: string;
+					email: string;
+					name?: string;
+					created_at?: string;
+					updated_at?: string;
+				};
+				Update: Partial<Database["public"]["Tables"]["sellers"]["Insert"]>;
+				Relationships: [];
+			};
 			products: {
 				Row: {
 					id: string;
@@ -15,6 +33,7 @@ export type Database = {
 					stock: number;
 					sales_count: number;
 					status: string;
+					seller_id: string | null;
 					created_at: string;
 					updated_at: string;
 				};
@@ -27,6 +46,7 @@ export type Database = {
 					stock?: number;
 					sales_count?: number;
 					status?: string;
+					seller_id?: string;
 					created_at?: string;
 					updated_at?: string;
 				};
@@ -48,6 +68,7 @@ export type Database = {
 					shipped_at: string | null;
 					delivered_at: string | null;
 					is_delayed: boolean;
+					seller_id: string | null;
 					created_at: string;
 					updated_at: string;
 				};
@@ -65,6 +86,7 @@ export type Database = {
 					shipped_at?: string | null;
 					delivered_at?: string | null;
 					is_delayed?: boolean;
+					seller_id?: string;
 					created_at?: string;
 					updated_at?: string;
 				};
