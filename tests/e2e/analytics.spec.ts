@@ -8,7 +8,7 @@ test.describe("매출 분석", () => {
 	});
 
 	test("매출 분석 페이지가 렌더링된다", async ({ page }) => {
-		await expect(page.getByText("매출 분석")).toBeVisible({ timeout: 10000 });
+		await expect(page.getByRole("heading", { name: "매출 분석" })).toBeVisible({ timeout: 10000 });
 		await expect(page.getByRole("button", { name: "7일" })).toBeVisible();
 		await expect(page.getByRole("button", { name: "30일" })).toBeVisible();
 		await expect(page.getByRole("button", { name: "90일" })).toBeVisible();
